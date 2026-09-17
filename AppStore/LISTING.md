@@ -167,7 +167,7 @@ and the privacy policy says so, but nothing in it warrants a higher rating.
 ## Copyright (required; format is year + entity, Apple adds the © symbol)
 
 ```
-2026 <<OWNER: legal name>>
+2026 Brian Suchanek
 ```
 
 ## Version and build
@@ -179,8 +179,8 @@ and the privacy policy says so, but nothing in it warrants a higher rating.
 ## App Review information (on the version page)
 
 - Sign-in required: **No** (there is no login and no account)
-- First name: `<<OWNER: review contact first name>>`
-- Last name: `<<OWNER: review contact last name>>`
+- First name: `Brian`
+- Last name: `Suchanek`
 - Phone number: `<<OWNER: review contact phone>>`
 - Email: `suchanekbs@gmail.com`
 - Notes: paste `AppStore/REVIEW_NOTES.md` (everything below its rule)
