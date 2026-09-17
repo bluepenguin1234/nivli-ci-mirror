@@ -83,6 +83,17 @@ final class AppModel {
 
     // MARK: - Lifecycle
 
+    /// Called synchronously from the app's initialiser, before any view exists. Health
+    /// background delivery only reaches an app that re-registers its observer query at
+    /// process launch, and iOS may launch Nivli in the background for exactly that reason,
+    /// so the observer cannot wait for the first screen's `.task`.
+    func prepareForLaunch() {
+        guard state.healthEnabled else { return }
+        health.startObserving { [weak self] in
+            await self?.healthDidChange()
+        }
+    }
+
     /// Called once from the app's `.task`: starts StoreKit, Health observing, and does the
     /// first refresh. Safe to call again.
     func start() async {
@@ -91,11 +102,7 @@ final class AppModel {
         }
         await subscriptions.start()
         screenTime.refresh()
-        if state.healthEnabled {
-            health.startObserving { [weak self] in
-                await self?.healthDidChange()
-            }
-        }
+        prepareForLaunch()
         await refresh()
     }
 
@@ -143,9 +150,6 @@ final class AppModel {
     func completeOnboarding() {
         update { $0.onboardingComplete = true }
         startDailyMonitoring()
-        if state.reminderEnabled {
-            notifications.scheduleEveningNudge(minutesFromMidnight: state.reminderMinutesFromMidnight)
-        }
     }
 
     /// A new choice of apps from the picker (onboarding or Settings).
@@ -186,9 +190,7 @@ final class AppModel {
             $0.reminderEnabled = effective
             $0.reminderMinutesFromMidnight = minutesFromMidnight
         }
-        if effective {
-            notifications.scheduleEveningNudge(minutesFromMidnight: minutesFromMidnight)
-        } else {
+        if !effective {
             notifications.cancelEveningNudge()
         }
         return allowed
@@ -236,6 +238,18 @@ final class AppModel {
 
     private func applyShields() {
         shields.refresh(sharedStore: sharedStore, now: Date())
+        rescheduleNudge()
+    }
+
+    /// Keeps the evening nudge honest: once today is unlocked (or is a rest day) the next
+    /// nudge is tomorrow's, not tonight's.
+    private func rescheduleNudge() {
+        guard state.onboardingComplete, state.reminderEnabled else { return }
+        notifications.scheduleEveningNudge(
+            minutesFromMidnight: state.reminderMinutesFromMidnight,
+            skipToday: !decision.isLocked,
+            calendar: calendar
+        )
     }
 
     private func importHealthWorkouts() async {
