@@ -38,7 +38,10 @@ final class ScreenTimeAuthorization {
         case .approved:
             status = .approved
         @unknown default:
-            status = .unavailable(Self.unavailableMessage)
+            // iOS 26 added `.approvedWithDataAccess`, which cannot be named here without
+            // raising the deployment target. Every status Apple has added so far is a form
+            // of approval, and a refusal always arrives as `.denied`, so treat it as approved.
+            status = .approved
         }
     }
 
