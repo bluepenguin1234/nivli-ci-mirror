@@ -46,13 +46,18 @@ struct ShieldController {
     }
 
     /// Load the shared state, ask `ShieldPolicy`, then apply or clear. Returns the decision
-    /// so the caller can show the matching screen.
+    /// so the caller can show the matching screen, or `nil` when the state file could not
+    /// be read (a restarted, still-locked iPhone at midnight): then nothing is touched,
+    /// because an unreadable file says nothing about the subscription or the day.
     ///
     /// This is the one entry point the app uses on every foreground and the DeviceActivity
     /// monitor uses at the start and end of every day.
     @discardableResult
-    func refresh(sharedStore: SharedStore = .shared, now: Date = Date()) -> ShieldDecision {
-        let state = sharedStore.load()
+    func refresh(sharedStore: SharedStore = .shared, now: Date = Date()) -> ShieldDecision? {
+        guard let state = sharedStore.loadIfReadable() else {
+            logger.error("Shield refresh skipped: state unreadable")
+            return nil
+        }
         let decision = ShieldPolicy.decision(state, now: now)
         switch decision {
         case .locked:

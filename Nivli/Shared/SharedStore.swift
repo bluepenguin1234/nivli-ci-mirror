@@ -39,9 +39,22 @@ final class SharedStore: @unchecked Sendable {
     }
 
     /// The stored state, or a fresh default one if nothing is stored or the data is
-    /// unreadable. Never throws, never returns `nil`.
+    /// unreadable. Never throws, never returns `nil`. The app uses this: it always runs
+    /// after the iPhone has been unlocked, so "unreadable" can only mean "corrupt".
     func load() -> NivliState {
-        guard let data = try? Data(contentsOf: fileURL) else { return NivliState() }
+        loadIfReadable() ?? NivliState()
+    }
+
+    /// Like `load()`, but `nil` when the file exists and cannot be read at all — the phone
+    /// restarted and has not been unlocked yet (file protection), or an I/O error. The
+    /// midnight extension uses this so it never mistakes a locked file for "no subscription"
+    /// and drops every shield. A missing file is a fresh state; a corrupt one is too.
+    func loadIfReadable() -> NivliState? {
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return NivliState() }
+        guard let data = try? Data(contentsOf: fileURL) else {
+            logger.error("State file exists but could not be read; leaving things as they are")
+            return nil
+        }
         do {
             return try decoder.decode(NivliState.self, from: data)
         } catch {
