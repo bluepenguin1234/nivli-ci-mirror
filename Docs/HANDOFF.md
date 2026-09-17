@@ -118,7 +118,15 @@ build to App Store Connect** on Codemagic (or attach the TestFlight build), then
 for Review**. Delete every old 2.x screenshot first; the reviewer compares screenshots to
 the app.
 
-## 9. After approval
+## 9. Housekeeping
+
+- The compile check ran on a temporary mirror repository, `bluepenguin1234/nivli-ci-mirror`,
+  which is now private. It holds nothing that `nivli` does not. Delete it whenever you like:
+  GitHub → the repository → Settings → Danger Zone → Delete this repository.
+- The Windows Swift toolchain installed on this PC (used only for syntax checks) can be
+  removed from Settings → Apps if you do not want it.
+
+## 10. After approval
 
 - Keep an eye on App Store Connect → **Crashes** for the first week.
 - Optional 7-day free trial: an App Store Connect-only change (SUBSCRIPTION_SETUP.md, last
