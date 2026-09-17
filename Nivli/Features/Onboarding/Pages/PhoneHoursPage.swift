@@ -14,6 +14,8 @@ struct PhoneHoursPage: View {
                 subtitle: "Social apps only. A rough guess is fine."
             )
 
+            forecastCard
+
             VStack(spacing: 10) {
                 ForEach(PhoneHours.allCases) { hours in
                     ChoiceRow(
@@ -32,6 +34,32 @@ struct PhoneHoursPage: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// The hook, above the question: the number the person is about to estimate, stated as an
+    /// average rather than as a fact about them. It is the argument in one eyeful, and it is the
+    /// only lit thing on the page until they answer.
+    private var forecastCard: some View {
+        SurfaceCard {
+            VStack(alignment: .leading, spacing: 6) {
+                TelemetryLabel("Today's forecast")
+                Text("5–6 h")
+                    .font(Theme.numeral(.largeTitle))
+                    .foregroundStyle(Color.accentColor)
+                    .modifier(Theme.glow(.accentColor, radius: 18))
+                Text("is what the average person spends on their phone today.")
+                    .font(.subheadline)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("Most of it in the same few apps.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(
+            "Today's forecast. 5 to 6 hours is what the average person spends on their phone today. Most of it in the same few apps."
+        )
     }
 
     private func yearCard(days: Int) -> some View {

@@ -23,7 +23,7 @@ struct SummaryPage: View {
 
             weekPreview
 
-            Text("Your first streak starts with today's workout.")
+            Text("Log movement before the scroll. Your first streak starts today.")
                 .font(.body.weight(.semibold))
                 .fixedSize(horizontal: false, vertical: true)
         }

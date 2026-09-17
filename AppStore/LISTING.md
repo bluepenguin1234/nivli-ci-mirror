@@ -32,7 +32,7 @@ belong to the old product and must be replaced.
 ## Promotional text
 
 ```
-You'll spend 5 to 6 hours on your phone today. Nivli holds the apps you choose until you've moved. Get a workout in, log it, then scroll.
+The average phone day runs 5 to 6 hours. Nivli holds the apps you choose until you've moved. Get a workout in, log it, then scroll.
 ```
 
 170 max, editable at any time without a new build.
@@ -40,7 +40,7 @@ You'll spend 5 to 6 hours on your phone today. Nivli holds the apps you choose u
 ## Description
 
 ```
-You'll spend 5 to 6 hours on your phone today. Most of it in the same few apps.
+The average phone day runs 5 to 6 hours. Most of it in the same few apps.
 
 Nivli locks those apps until you've moved. Get a workout in, log it, and they open for the rest of the day. At midnight they lock again, and tomorrow you earn them back.
 
@@ -222,3 +222,28 @@ them at `Restore Purchases`.
   StoreKit only). Answer "None of the algorithms mentioned above" / exempt.
   `ITSAppUsesNonExemptEncryption = NO` is already set in the build, so App Store Connect should
   not ask.
+
+## Opal-informed wording
+
+This section is notes, not a submitted field. Nothing below is pasted into App Store Connect,
+and the competitor's name never appears in the name, subtitle, promotional text, description or
+keywords.
+
+The 2026-09-17 copy pass tightened the app's voice against the reading recorded in
+`Docs/design/2026-09-17-opal-wording-notes.md`. Three lines now carry the pitch inside the app.
+The promotional text and the opening of the description above already say the same thing in the
+same order, and must keep saying it — if one changes, all four change together.
+
+| Where | Line |
+|---|---|
+| Onboarding, phone-hours hook (`PhoneHoursPage.swift`) | 5–6 h — "is what the average person spends on their phone today." |
+| Onboarding, welcome (`WelcomePage.swift`) | "Get a workout in. Log it. Then scroll." |
+| Onboarding, summary (`SummaryPage.swift`) | "Log movement before the scroll. Your first streak starts today." |
+
+Two rules this pass fixed in place:
+
+- The hours are always an average, never the reader's measured number. "The average person
+  spends 5 to 6 hours" is defensible; "you spend 5 to 6 hours" is not, and neither is a saved-
+  time or outcome figure of any kind. Nivli claims no health, productivity or wellbeing result.
+- No free-tier language anywhere. There is one plan at $2.99 a month, and the price sits next to
+  every call to action.

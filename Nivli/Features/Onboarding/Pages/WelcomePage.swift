@@ -31,12 +31,12 @@ struct WelcomePage: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
 
-                Text("Nivli keeps the apps you choose locked until you have worked out today.")
+                Text("Get a workout in. Log it. Then scroll.")
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("Log it in two taps, or let Apple Health prove it for you.")
+                Text("The apps you choose stay locked until you've moved. Apple Health can unlock them for you.")
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

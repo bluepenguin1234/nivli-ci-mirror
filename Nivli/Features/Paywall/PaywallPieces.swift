@@ -6,13 +6,13 @@ struct PaywallBenefits: View {
         VStack(alignment: .leading, spacing: 16) {
             BenefitRow(
                 systemImage: "lock.fill",
-                title: "The apps you chose stay shut",
-                detail: "Until a workout says otherwise. Nivli never sees which apps they are."
+                title: "Your apps wait until you've moved",
+                detail: "Until midnight, then they lock again. Nivli never sees which apps they are."
             )
             BenefitRow(
                 systemImage: "heart.fill",
                 title: "Apple Health unlocks them for you",
-                detail: "A Watch run or a gym session opens everything without opening Nivli."
+                detail: "A Watch run or a gym session opens everything, even while Nivli is closed."
             )
             BenefitRow(
                 systemImage: "flame.fill",
