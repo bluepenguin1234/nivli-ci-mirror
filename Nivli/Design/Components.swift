@@ -1,16 +1,40 @@
 import SwiftUI
 
-/// A card on the canvas: the surface colour, the app's corner radius, a hairline.
+/// A card on the canvas. Glass by default — `.ultraThinMaterial` over the lit canvas, with a
+/// hairline so the pane still has an edge — and solid where a card must stay opaque, or where
+/// the person asked iOS to reduce transparency.
 struct SurfaceCard<Content: View>: View {
+    enum Style {
+        case glass
+        case solid
+    }
+
+    var style: Style = .glass
     var padding: CGFloat = Theme.cardPadding
     @ViewBuilder var content: () -> Content
+
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: Theme.glassRadius, style: .continuous)
+    }
+
+    private var isGlass: Bool {
+        style == .glass && !reduceTransparency
+    }
 
     var body: some View {
         content()
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.nivliSurface, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(Color.nivliLine))
+            .background {
+                if isGlass {
+                    shape.fill(.ultraThinMaterial)
+                } else {
+                    shape.fill(Color.nivliSurface)
+                }
+            }
+            .overlay(shape.strokeBorder(Theme.glassStroke, lineWidth: 1))
     }
 }
 
@@ -36,7 +60,8 @@ struct PageHeading: View {
     }
 }
 
-/// A selectable row: a symbol, a title, an optional line, and a check when chosen.
+/// A selectable row: a symbol, a title, an optional line, and a check when chosen. Choosing
+/// it lights it: the accent fills it faintly, edges it, and pools underneath it.
 struct ChoiceRow: View {
     let title: String
     var subtitle: String? = nil
@@ -45,6 +70,7 @@ struct ChoiceRow: View {
     let action: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Button(action: action) {
@@ -76,6 +102,11 @@ struct ChoiceRow: View {
                 RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
                     .strokeBorder(isSelected ? Color.accentColor : Color.nivliLine, lineWidth: isSelected ? 1.5 : 1)
             )
+            .shadow(
+                color: Color.accentColor.opacity(isSelected ? Theme.glowOpacity(0.18, in: colorScheme) : 0),
+                radius: 10,
+                y: 2
+            )
             .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: isSelected)
         }
         .buttonStyle(.plain)
@@ -104,27 +135,34 @@ struct StepProgressBar: View {
     }
 }
 
-/// Small rounded label used for counts and states.
+/// A telemetry pill: uppercase monospaced text inside a hairlined capsule. Used for counts
+/// and states, where a machine-readable label says more than a sentence would.
 struct Chip: View {
     let text: String
     var systemImage: String? = nil
     var tint: Color = .secondary
 
+    private var label: Text {
+        Text(text.uppercased()).tracking(Theme.telemetryTracking)
+    }
+
     var body: some View {
         Group {
             if let systemImage {
-                Label(text, systemImage: systemImage)
+                Label { label } icon: { Image(systemName: systemImage) }
             } else {
-                Text(text)
+                label
             }
         }
-        .font(.caption.weight(.semibold))
+        .font(Theme.telemetry)
         .foregroundStyle(tint)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(tint.opacity(0.14), in: Capsule())
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(tint.opacity(0.12), in: Capsule())
+        .overlay(Capsule().strokeBorder(tint.opacity(0.35), lineWidth: 1))
         .minimumScaleFactor(0.8)
         .lineLimit(1)
+        .accessibilityLabel(text)
     }
 }
 
@@ -141,6 +179,7 @@ struct BenefitRow: View {
                 .foregroundStyle(Color.accentColor)
                 .frame(width: 36, height: 36)
                 .background(Color.accentColor.opacity(0.14), in: Circle())
+                .overlay(Circle().strokeBorder(Color.accentColor.opacity(0.25), lineWidth: 1))
             VStack(alignment: .leading, spacing: 3) {
                 Text(title).font(.body.weight(.semibold))
                 Text(detail).font(.subheadline).foregroundStyle(.secondary)

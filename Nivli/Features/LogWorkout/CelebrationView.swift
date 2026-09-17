@@ -1,8 +1,9 @@
 import Foundation
 import SwiftUI
 
-/// The two seconds after a workout lands. A check springs in, the streak reads big, and a
-/// milestone brings confetti. Tapping anywhere gets out of the way.
+/// The two seconds after a workout lands. A check springs in inside its own light, one ring
+/// expands away from it, the streak reads big, and a milestone brings confetti. Tapping
+/// anywhere gets out of the way.
 struct CelebrationView: View {
     let result: LogResult
     let onDone: () -> Void
@@ -10,6 +11,7 @@ struct CelebrationView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var hasArrived = false
+    @State private var hasPulsed = false
 
     /// The check and the disc behind it follow the person's text size, so the celebration
     /// reads the same at every Dynamic Type setting.
@@ -41,9 +43,13 @@ struct CelebrationView: View {
     private var content: some View {
         VStack(spacing: 18) {
             ZStack {
+                pulse
                 Circle()
                     .fill(Theme.mint.opacity(0.16))
                     .frame(width: discSize, height: discSize)
+                    // This screen is always dark, whatever the appearance, so the light on it
+                    // is the full 35% rather than the Light-mode ceiling.
+                    .shadow(color: Theme.mint.opacity(0.35), radius: 28)
                 Image(systemName: "checkmark")
                     .font(.system(size: checkSize, weight: .bold))
                     .foregroundStyle(Theme.mint)
@@ -68,6 +74,20 @@ struct CelebrationView: View {
         .padding(.horizontal, Theme.screenPadding)
     }
 
+    /// One ring travelling outwards and fading, over 1.2 seconds, once. Nothing repeats, and
+    /// under reduce motion it is never drawn at all.
+    @ViewBuilder
+    private var pulse: some View {
+        if !reduceMotion {
+            Circle()
+                .strokeBorder(Theme.mint.opacity(hasPulsed ? 0 : 0.45), lineWidth: 2)
+                .frame(width: discSize, height: discSize)
+                .scaleEffect(hasPulsed ? 1.7 : 1)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
+    }
+
     private var showsConfetti: Bool {
         result.milestone != nil && !reduceMotion
     }
@@ -88,6 +108,9 @@ struct CelebrationView: View {
         }
         withAnimation(.spring(response: 0.45, dampingFraction: 0.6)) {
             hasArrived = true
+        }
+        withAnimation(.easeOut(duration: 1.2)) {
+            hasPulsed = true
         }
     }
 }

@@ -20,6 +20,11 @@ enum NivliPalette {
     static let dayRaised = UIColor(red: 0xF0 / 255, green: 0xF5 / 255, blue: 0xF6 / 255, alpha: 1)
     static let dayDisc = UIColor(red: 0xDC / 255, green: 0xE7 / 255, blue: 0xEA / 255, alpha: 1)
 
+    // The two lights behind every screen. Neither is ever a control colour: the brand mint
+    // reads as warmth, the cool violet only keeps the canvas from going flat.
+    static let lightMint = UIColor(red: 0x5E / 255, green: 0xDC / 255, blue: 0xC0 / 255, alpha: 1)
+    static let lightViolet = UIColor(red: 0x7C / 255, green: 0x6C / 255, blue: 0xF6 / 255, alpha: 1)
+
     /// A colour that follows the appearance the view is drawn in.
     static func adaptive(night: UIColor, day: UIColor) -> Color {
         Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? night : day })
@@ -38,10 +43,17 @@ extension Color {
     static let nivliDisc = NivliPalette.adaptive(night: NivliPalette.nightDisc, day: NivliPalette.dayDisc)
     /// A hairline between rows or around a card.
     static let nivliLine = NivliPalette.adaptive(night: UIColor.white.withAlphaComponent(0.08), day: UIColor.black.withAlphaComponent(0.08))
+    /// The lit end of the accent. Only ever used inside a gradient, so a stroke carries a
+    /// highlight instead of one flat colour. Still the accent family: one accent, two values.
+    static let nivliAccentHighlight = NivliPalette.adaptive(
+        night: UIColor(red: 0xA9 / 255, green: 0xF3 / 255, blue: 0xE2 / 255, alpha: 1),
+        day: UIColor(red: 0x2E / 255, green: 0xA8 / 255, blue: 0x94 / 255, alpha: 1)
+    )
 }
 
 /// The canvas itself: a soft glow centred just above the middle — the brand page's
 /// `radial-gradient(88% 46% at 50% 38%, #10242F, #08131C 72%)` — or its daylight twin.
+/// Kept flat and cheap, for the launch screen and anywhere a background must not move.
 struct NivliCanvas: View {
     @Environment(\.colorScheme) private var colorScheme
 
@@ -59,13 +71,53 @@ struct NivliCanvas: View {
     }
 }
 
+/// The canvas with two lights on it: mint from the upper left, a cool violet from the lower
+/// right, both blurred far past their own edges so neither ever reads as a circle. This is
+/// what gives a screen depth, and what gives a glass card something to refract — a material
+/// over one flat colour is just a tint.
+///
+/// Night carries the light. Day only hints at it, because a bright orb under a glass card
+/// takes the contrast out of the text sitting on it.
+struct NivliGlow: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    private static let blur: CGFloat = 80
+
+    private var mintOpacity: Double { colorScheme == .dark ? 0.18 : 0.07 }
+    private var violetOpacity: Double { colorScheme == .dark ? 0.10 : 0.05 }
+
+    var body: some View {
+        NivliCanvas()
+            .overlay {
+                GeometryReader { proxy in
+                    let span = max(proxy.size.width, proxy.size.height)
+                    ZStack {
+                        orb(Color(uiColor: NivliPalette.lightMint), opacity: mintOpacity, diameter: span * 0.9)
+                            .position(x: proxy.size.width * 0.14, y: proxy.size.height * 0.14)
+                        orb(Color(uiColor: NivliPalette.lightViolet), opacity: violetOpacity, diameter: span * 0.8)
+                            .position(x: proxy.size.width * 0.9, y: proxy.size.height * 0.84)
+                    }
+                }
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+            }
+    }
+
+    private func orb(_ color: Color, opacity: Double, diameter: CGFloat) -> some View {
+        Circle()
+            .fill(color.opacity(opacity))
+            .frame(width: diameter, height: diameter)
+            .blur(radius: Self.blur)
+    }
+}
+
 extension View {
-    /// Puts a screen on the canvas: a List or Form loses its own grey, the canvas paints
+    /// Puts a screen on the canvas: a List or Form loses its own grey, the lit canvas paints
     /// edge to edge behind it, and the navigation bar stays clear over it.
     func nivliScreen() -> some View {
         self
             .scrollContentBackground(.hidden)
-            .background(NivliCanvas().ignoresSafeArea())
+            .background(NivliGlow().ignoresSafeArea())
             .toolbarBackground(.hidden, for: .navigationBar)
     }
 
@@ -73,7 +125,7 @@ extension View {
     func nivliSheet() -> some View {
         self
             .scrollContentBackground(.hidden)
-            .presentationBackground { NivliCanvas() }
+            .presentationBackground { NivliGlow() }
     }
 
     /// A row that sits on the canvas as a surface. Apply to a `Section`'s content or to a

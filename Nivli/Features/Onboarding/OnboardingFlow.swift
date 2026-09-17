@@ -20,7 +20,7 @@ struct OnboardingFlow: View {
                 pages
             }
         }
-        .background(NivliCanvas().ignoresSafeArea())
+        .background(NivliGlow().ignoresSafeArea())
         .onAppear { loadDraft() }
     }
 

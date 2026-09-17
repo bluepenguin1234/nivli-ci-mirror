@@ -32,7 +32,7 @@ belong to the old product and must be replaced.
 ## Promotional text
 
 ```
-Pick the apps that eat your evenings. Nivli holds them until you have moved. Log a workout, or let Apple Health do it for you, and they open until midnight.
+You'll spend 5 to 6 hours on your phone today. Nivli holds the apps you choose until you've moved. Get a workout in, log it, then scroll.
 ```
 
 170 max, editable at any time without a new build.
@@ -40,9 +40,9 @@ Pick the apps that eat your evenings. Nivli holds them until you have moved. Log
 ## Description
 
 ```
-Nivli locks the apps you choose until you have worked out today.
+You'll spend 5 to 6 hours on your phone today. Most of it in the same few apps.
 
-Pick the ones that take your evenings. From midnight they sit behind a lock screen. Log a workout and they open for the rest of the day. Tomorrow they are waiting again.
+Nivli locks those apps until you've moved. Get a workout in, log it, and they open for the rest of the day. At midnight they lock again, and tomorrow you earn them back.
 
 Move first. Then scroll.
 

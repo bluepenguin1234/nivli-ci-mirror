@@ -23,8 +23,9 @@ struct PaywallBenefits: View {
     }
 }
 
-/// The plan on sale. Every number comes from the storefront, never from a literal, so the
-/// caller hands in the lines `SubscriptionStore` built from the `Product`.
+/// The plan on sale: a glass pane edged in mint, with the price as the only lit thing on it.
+/// Every number comes from the storefront, never from a literal, so the caller hands in the
+/// lines `SubscriptionStore` built from the `Product`.
 struct PaywallPlanCard: View {
     let priceLine: String
     var introductoryOfferLine: String? = nil
@@ -32,11 +33,13 @@ struct PaywallPlanCard: View {
     var body: some View {
         SurfaceCard {
             VStack(alignment: .leading, spacing: 10) {
+                TelemetryLabel("Monthly", tint: .accentColor)
                 Text(AppConfig.appName)
                     .font(.title3.weight(.bold))
                 Text(priceLine)
                     .font(Theme.numeral(.title2))
                     .foregroundStyle(Color.accentColor)
+                    .modifier(Theme.glow(.accentColor, radius: 18))
                 if let introductoryOfferLine {
                     Text(introductoryOfferLine)
                         .font(.subheadline)
@@ -47,6 +50,12 @@ struct PaywallPlanCard: View {
                     .padding(.top, 2)
             }
         }
+        // The one card in the app that is edged in the accent rather than a neutral hairline:
+        // it is the thing the screen exists to sell.
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.glassRadius, style: .continuous)
+                .strokeBorder(Color.accentColor.opacity(0.35), lineWidth: 1)
+        )
     }
 }
 

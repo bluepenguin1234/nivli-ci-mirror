@@ -2,9 +2,11 @@ import Foundation
 import SwiftUI
 
 /// The second hero: how many days in a row, how good it has ever been, and the last seven
-/// days as dots so a gap is visible before it becomes a habit.
+/// days as dots so a gap is visible before it becomes a habit. The count is the only lit
+/// thing on the card, and only while there is a streak to light.
 struct StreakCard: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.colorScheme) private var colorScheme
 
     /// The streak is the biggest number on Home, so it follows the text size the person
     /// chose instead of staying at 56 points while everything around it grows.
@@ -18,21 +20,18 @@ struct StreakCard: View {
                         .font(.system(size: 30, weight: .semibold))
                         .foregroundStyle(model.streak > 0 ? Color.accentColor : Color.secondary)
                         .accessibilityHidden(true)
-                    VStack(alignment: .leading, spacing: -2) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text("\(model.streak)")
                             .font(.system(size: streakSize, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .contentTransition(.numericText())
                             .animation(.snappy, value: model.streak)
-                        Text("day streak")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .shadow(color: streakGlow, radius: 16)
+                        TelemetryLabel("Day streak")
                     }
                     Spacer(minLength: 8)
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("Longest")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    VStack(alignment: .trailing, spacing: 4) {
+                        TelemetryLabel("Longest")
                         Text("\(model.longestStreak)")
                             .font(Theme.numeral(.title3))
                             .contentTransition(.numericText())
@@ -46,6 +45,12 @@ struct StreakCard: View {
                 WeekStrip(dots: dots)
             }
         }
+    }
+
+    /// Nothing to celebrate, nothing to light: a zero sits flat on the card.
+    private var streakGlow: Color {
+        guard model.streak > 0 else { return .clear }
+        return Color.accentColor.opacity(Theme.glowOpacity(0.3, in: colorScheme))
     }
 
     /// The last seven days, oldest first, paired with the weekday initial iOS uses in this
@@ -71,7 +76,8 @@ struct StreakCard: View {
     }
 }
 
-/// Seven dots and seven letters. Oldest on the left, today on the right.
+/// Seven dots and seven letters. Oldest on the left, today on the right. Every dot carries a
+/// hairline so the row reads as a set of instruments rather than a row of blobs.
 struct WeekStrip: View {
     struct Dot: Identifiable, Equatable {
         let id: Int
@@ -80,6 +86,8 @@ struct WeekStrip: View {
     }
 
     let dots: [Dot]
+
+    @Environment(\.colorScheme) private var colorScheme
 
     private static let size: CGFloat = 26
 
@@ -90,7 +98,7 @@ struct WeekStrip: View {
                     mark(for: dot.status)
                         .frame(width: Self.size, height: Self.size)
                     Text(dot.initial)
-                        .font(.caption2.weight(.medium))
+                        .font(Theme.telemetry)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
@@ -111,6 +119,8 @@ struct WeekStrip: View {
                     .font(.system(size: 11, weight: .heavy))
                     .foregroundStyle(Color.nivliCanvas)
             }
+            .overlay(Circle().strokeBorder(Theme.glassStroke, lineWidth: 1))
+            .shadow(color: Color.accentColor.opacity(Theme.glowOpacity(0.35, in: colorScheme)), radius: 6)
         case .rest:
             ZStack {
                 Circle().strokeBorder(Color.nivliLine, lineWidth: 1.5)
@@ -119,7 +129,9 @@ struct WeekStrip: View {
                     .foregroundStyle(.secondary)
             }
         case .missed:
-            Circle().fill(Color.nivliLine)
+            Circle()
+                .fill(Color.nivliLine)
+                .overlay(Circle().strokeBorder(Theme.glassStroke, lineWidth: 1))
         case .today:
             Circle().strokeBorder(Color.accentColor, lineWidth: 2.5)
         case .future:
