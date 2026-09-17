@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Crect width='1024' height='1024' rx='224' fill='%23142B39'/%3E%3Cpath d='M302 704V312L718 704V432' fill='none' stroke='%23FFFFFF' stroke-width='92' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='718' cy='312' r='50' fill='%235EDCC0'/%3E%3C/svg%3E">
+<title>Nivli Support</title>
+<style>
+  :root{
+    --bg:#F7F9FA; --ink:#142B39; --text:#1F3442; --muted:#5B6E7A;
+    --card:#FFFFFF; --line:#DCE4E8; --accent:#157F6C; --mint:#5EDCC0;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0E1E29; --ink:#F2F6F7; --text:#D9E2E6; --muted:#9BB0BA;
+           --card:#142B39; --line:#24404F; --accent:#5EDCC0; }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text)}
+  body{font:17px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:0 20px}
+  main{max-width:720px;margin:0 auto;padding:48px 0 72px}
+  header a{color:var(--accent);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+  header a .icon{width:22px;height:22px;flex:0 0 auto}
+  h1{color:var(--ink);font-size:2.1rem;line-height:1.15;letter-spacing:-.02em;margin:.4em 0 .2em}
+  h2{color:var(--ink);font-size:1.25rem;margin:2em 0 .5em}
+  h3{color:var(--ink);font-size:1.05rem;margin:1.4em 0 .3em}
+  p,li{margin:.5em 0}
+  ul,ol{padding-left:1.3em}
+  a{color:var(--accent)}
+  .note{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--mint);border-radius:12px;padding:14px 18px;margin:20px 0}
+  code{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.1em .35em;font-size:.92em}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}
+  footer a{color:var(--accent);text-decoration:none;margin-right:16px}
+</style>
+</head>
+<body>
+<main>
+  <header><a href="index.html"><svg class="icon" viewBox="0 0 1024 1024" role="img" aria-label="Nivli icon"><rect width="1024" height="1024" rx="224" fill="#142B39"/><path d="M302 704V312L718 704V432" fill="none" stroke="#FFFFFF" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg> Nivli</a></header>
+  <h1>Nivli Support</h1>
+  <p>Nivli locks the apps you choose until you have worked out today. Log a workout by hand, or connect Apple Health and let a run or a gym session unlock the day for you. The apps open until midnight, and the streak grows. Everything stays on your iPhone. Requires iOS 18 or later, iPhone only.</p>
+
+  <div class="note">
+    <p><strong>Nivli 3.0 is a new app.</strong> Nivli used to be a memory app for the upkeep of life. Version 3.0 replaces it with this one. If you are looking for the old product, its features are not in this version.</p>
+  </div>
+
+  <h2>The basics</h2>
+  <ul>
+    <li><strong>Apps that wait</strong>: the apps, categories and websites you chose during onboarding. iOS shields them; Nivli never sees their names.</li>
+    <li><strong>Log a workout</strong>: the button on Home. Pick a kind and a length, tap <em>Log it</em>, done.</li>
+    <li><strong>Apple Health</strong>: optional and read-only. A workout recorded by your Apple Watch, or by any app that writes to Health, unlocks the day on its own.</li>
+    <li><strong>Minimum</strong>: the length a workout has to reach to count. Default 20 minutes; choose 10, 15, 20, 30, 45 or 60 in Settings.</li>
+    <li><strong>Streak</strong>: the run of days ending today in which you either moved or took a rest day.</li>
+    <li><strong>Rest days</strong>: weekly days off, plus <em>Take today off</em> for a one-off.</li>
+    <li><strong>Reminder</strong>: an optional evening nudge if you have not moved yet.</li>
+  </ul>
+
+  <h2>Frequently asked questions</h2>
+
+  <h3>What counts as a workout?</h3>
+  <p>Any workout, from either source, that is at least as long as your minimum.</p>
+  <ul>
+    <li><strong>Logged by you.</strong> Pick one of the nine kinds (run, walk, strength, cycle, swim, yoga, HIIT, sport, other) and a length. It is an honour system; Nivli believes you.</li>
+    <li><strong>From Apple Health.</strong> Any workout saved to Health today, by your Apple Watch or by another app, counted by its recorded duration.</li>
+  </ul>
+  <p>Your minimum is in <strong>Settings &rsaquo; Minimum workout</strong>, and the default is 20 minutes. A shorter session is still kept in your history, it just does not unlock the day. The Log sheet tells you which it will be before you save. Nivli does not look at intensity, heart rate, distance or calories.</p>
+
+  <h3>I worked out, but my apps are still locked</h3>
+  <p>Work through these in order.</p>
+  <ol>
+    <li><strong>Open Nivli once.</strong> If you logged the workout by hand, the shields lift straight away. If it came from Apple Health while your phone was in your pocket, opening Nivli always forces the check.</li>
+    <li><strong>Give Health a moment.</strong> A workout ended on an Apple Watch has to sync to the iPhone's Health app before Nivli can see it. That is usually seconds, but it can take a few minutes, and it will not happen at all while the watch is out of range.</li>
+    <li><strong>Check the length.</strong> A 12-minute walk does not clear a 20-minute minimum. Home shows today's workout and its length; lower the minimum in Settings if it is set higher than you meant.</li>
+    <li><strong>Check the day.</strong> Nivli uses your iPhone's own calendar day, midnight to midnight. A workout finished at 11:58 pm unlocks that day, not the next one.</li>
+    <li><strong>Close the app and open it again.</strong> An app you already had open when the workout landed keeps running; iOS only applies and removes shields as apps are opened.</li>
+  </ol>
+
+  <h3>An app I blocked was already open, and it kept working</h3>
+  <p>That is how iOS works and Nivli cannot change it. A shield stops an app from being opened; it cannot close one that is already running. Swipe the app away in the App Switcher and the shield appears the next time you tap its icon.</p>
+
+  <h3>How do I change which apps are locked?</h3>
+  <p>Open Nivli, go to <strong>Settings &rsaquo; Apps that wait</strong>, and tap to open Apple's picker. Add or remove apps, whole categories and websites, then close the picker. The change applies immediately. You can also tap <em>Edit</em> on the blocked apps card on Home.</p>
+
+  <h3>How do I stop Nivli blocking anything?</h3>
+  <ul>
+    <li><strong>Keep the app, unlock everything:</strong> <strong>Settings &rsaquo; Apps that wait</strong>, clear the selection so nothing is chosen. With an empty selection Nivli shields nothing, on any day.</li>
+    <li><strong>Just today:</strong> <strong>Settings &rsaquo; Take today off</strong>.</li>
+    <li><strong>Remove it completely:</strong> delete the Nivli app. iOS lifts every shield it set and removes its data with it. You can also switch Screen Time authorization off in iPhone <strong>Settings &rsaquo; Screen Time</strong>.</li>
+  </ul>
+  <p>There is no hidden hold on your phone. Nivli only shields what you picked, and only while it is installed, subscribed and set up.</p>
+
+  <h3>How do rest days work?</h3>
+  <p>In <strong>Settings &rsaquo; Rest days</strong> you can mark any weekdays as rest days. On a rest day nothing is locked, and your streak is neither broken nor grown. For a one-off, use <strong>Take today off</strong> on the same screen; it applies to today only and confirms first. New installs start with no rest days, so every day counts until you set some.</p>
+
+  <h3>Apple Health is not unlocking my apps</h3>
+  <ol>
+    <li>Open the <strong>Health</strong> app, then <strong>Sharing &rsaquo; Apps &rsaquo; Nivli</strong>, and make sure <strong>Workouts</strong> is switched on. Health permissions are all-or-nothing per type, and iOS never tells an app it was refused, so this is the first thing to check.</li>
+    <li>Check the workout is actually in Health: <strong>Browse &rsaquo; Activity &rsaquo; Workouts</strong>. If it is not there, the app or watch that recorded it did not save it, and Nivli has nothing to read.</li>
+    <li>Make sure Apple Health is on inside Nivli, under <strong>Settings &rsaquo; Apple Health</strong>.</li>
+    <li>Check the workout is long enough for your minimum and is dated today.</li>
+    <li>Open Nivli once. That forces an import, whatever the background state.</li>
+  </ol>
+  <p>Nivli only ever reads workouts, and never writes anything to Health. If you would rather not connect it at all, logging by hand does exactly the same job.</p>
+
+  <h3>Can I use Nivli without a subscription?</h3>
+  <p>No. Nivli is one subscription, $2.99 a month, and there is no free tier. Without a valid subscription Nivli shields nothing at all, so nothing gets stuck locked if you let it lapse. If you have bought Nivli before on this Apple Account, tap <strong>Restore Purchases</strong> on the paywall or in Settings.</p>
+
+  <h3>How do I cancel, or get a refund?</h3>
+  <p>Subscriptions are managed by Apple, not by us: iPhone <strong>Settings &rsaquo; [your name] &rsaquo; Subscriptions &rsaquo; Nivli</strong>, or <a href="https://apps.apple.com/account/subscriptions">apps.apple.com/account/subscriptions</a>. Cancel at least 24 hours before the renewal date to avoid being charged for the next period; you keep access until the period ends. Refunds are handled by Apple at <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>.</p>
+
+  <h3>I bought Nivli yearly or lifetime in an older version</h3>
+  <p>Those still work. They are not sold any more, but they are honoured: tap <strong>Restore Purchases</strong> and Nivli unlocks as usual.</p>
+
+  <h3>Can Nivli block apps on my child's phone?</h3>
+  <p>No. Nivli asks for Screen Time authorization for the iPhone it is installed on, for the person using it. It has no parental, family or child features and cannot manage another device. For that, use Apple's own Screen Time and Family Sharing.</p>
+
+  <h3>Can I get around it?</h3>
+  <p>Easily, if you want to. You can clear your selection, take the day off, or delete the app at any moment. Nivli is a speed bump you agreed to, not a lock someone else holds the key to.</p>
+
+  <h3>Does Nivli see what I do on my phone?</h3>
+  <p>No. The apps you choose reach Nivli as opaque tokens that only iOS can resolve, so it cannot read their names, let alone your usage. It has no server, no analytics and no third-party code. See the <a href="privacy.html">privacy policy</a> for the detail.</p>
+
+  <h3>How do I delete my data?</h3>
+  <p>Use <strong>Settings &rsaquo; Reset</strong> inside Nivli to erase your workouts, streak, selection and settings, or delete the app to remove everything at once. There is no copy anywhere else, so there is nothing further to request.</p>
+
+  <h3>I changed iPhone</h3>
+  <p>Restore the new phone from your iCloud or computer backup and your history comes with it. There is no account to sign in to. You will be asked for Screen Time and Health permissions again on the new device, and your subscription follows your Apple Account; tap <strong>Restore Purchases</strong> if the paywall appears.</p>
+
+  <div class="note">
+    <p><strong>Contact</strong><br>Email <a href="mailto:suchanekbs@gmail.com">suchanekbs@gmail.com</a>. Include your iOS version (Settings &rsaquo; General &rsaquo; About) and, if it helps, a screenshot. Please do not send personal data you would rather keep private; we never need it to help.</p>
+  </div>
+
+  <footer>
+    <a href="index.html">Home</a>
+    <a href="support.html">Support</a>
+    <a href="privacy.html">Privacy</a>
+  </footer>
+</main>
+</body>
+</html>

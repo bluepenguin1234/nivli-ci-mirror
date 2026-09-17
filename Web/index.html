@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Nivli locks the apps you choose until you have worked out today. Log it yourself or let Apple Health prove it. $2.99 a month, on your iPhone, nothing collected.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Crect width='1024' height='1024' rx='224' fill='%23142B39'/%3E%3Cpath d='M302 704V312L718 704V432' fill='none' stroke='%23FFFFFF' stroke-width='92' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='718' cy='312' r='50' fill='%235EDCC0'/%3E%3C/svg%3E">
+<title>Nivli — Move first. Then scroll.</title>
+<style>
+  :root{
+    --bg:#F7F9FA; --ink:#142B39; --text:#1F3442; --muted:#5B6E7A;
+    --card:#FFFFFF; --line:#DCE4E8; --accent:#157F6C; --mint:#5EDCC0; --hero-text:#FFFFFF;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0E1E29; --ink:#F2F6F7; --text:#D9E2E6; --muted:#9BB0BA;
+           --card:#142B39; --line:#24404F; --accent:#5EDCC0; }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text)}
+  body{font:17px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+  a{color:var(--accent)}
+
+  .hero{background:#142B39;color:var(--hero-text);padding:56px 0 64px}
+  .hero .wrap{display:flex;flex-direction:column;gap:20px;align-items:flex-start}
+  .mark{display:inline-flex;align-items:center;gap:12px;font-weight:700;letter-spacing:-.01em;font-size:1.1rem}
+  .mark .icon{width:44px;height:44px;display:block;flex:0 0 auto}
+  .hero h1{font-size:clamp(2.2rem,6vw,3.4rem);line-height:1.05;letter-spacing:-.03em;margin:0}
+  .hero h1 span{color:#5EDCC0}
+  .hero p.lead{font-size:1.2rem;max-width:34em;margin:0;color:#D9E2E6}
+  .cta{display:inline-block;background:#5EDCC0;color:#142B39;font-weight:700;text-decoration:none;padding:14px 22px;border-radius:12px;font-size:1.05rem}
+  .cta small{display:block;font-weight:500;font-size:.85rem;opacity:.85}
+  .hero .fine{color:#9BB0BA;font-size:.92rem;margin:0}
+
+  section{padding:48px 0}
+  h2{color:var(--ink);font-size:1.6rem;letter-spacing:-.02em;margin:0 0 20px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:700px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .card h3{margin:0 0 6px;color:var(--ink);font-size:1.1rem}
+  .card p{margin:0;color:var(--text)}
+  .card .step{width:28px;height:28px;border-radius:50%;background:var(--mint);color:#142B39;font-weight:700;font-size:.95rem;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+
+  .plan{background:var(--card);border:1px solid var(--mint);box-shadow:0 0 0 3px rgba(94,220,192,.18);border-radius:16px;padding:22px;max-width:30em}
+  .plan h3{margin:0 0 4px;color:var(--ink)}
+  .plan .amt{font-size:1.35rem;font-weight:700;color:var(--ink);margin:0 0 10px}
+  .plan ul{margin:0;padding-left:1.2em}
+  .plan li{margin:.3em 0}
+  .fine{color:var(--muted);font-size:.9rem}
+
+  footer{border-top:1px solid var(--line);padding:28px 0 48px;color:var(--muted);font-size:.92rem}
+  footer nav a{margin-right:18px;text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="mark"><svg class="icon" viewBox="0 0 1024 1024" role="img" aria-label="Nivli icon"><rect width="1024" height="1024" rx="224" fill="#142B39"/><path d="M302 704V312L718 704V432" fill="none" stroke="#FFFFFF" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg> Nivli</div>
+    <h1>Move first. <span>Then scroll.</span></h1>
+    <p class="lead">Nivli locks the apps you choose until you have worked out today. Log it in two taps, or let Apple Health prove it. Then the apps open, and the streak grows.</p>
+    <a class="cta" href="<<OWNER: App Store URL>>">Download on the App Store<small>$2.99 / month · iPhone · iOS 18 or later</small></a>
+    <p class="fine">No account. No server. Nothing collected. Nivli never learns which apps you picked.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>How it works</h2>
+    <div class="grid">
+      <div class="card"><div class="step">1</div><h3>Choose the apps that wait</h3><p>Pick the apps, categories and sites you would rather earn. Nivli holds them back with Apple's Screen Time settings, on this iPhone, for you.</p></div>
+      <div class="card"><div class="step">2</div><h3>Move</h3><p>Log a workout by hand, or connect Apple Health and let a run, a lift or a class unlock the day on its own. You set the minimum length.</p></div>
+      <div class="card"><div class="step">3</div><h3>Then scroll</h3><p>The apps open for the rest of the day and the streak goes up one. At midnight they lock again. Rest days are yours to set, and you can take today off.</p></div>
+    </div>
+    <p class="fine">Nivli cannot close an app you already have open. iOS shows the Nivli lock screen the next time you open it.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What it costs</h2>
+    <div class="plan">
+      <h3>Nivli Monthly</h3>
+      <p class="amt">$2.99 / month</p>
+      <ul>
+        <li>Lock the apps, categories and sites you choose</li>
+        <li>Apple Health unlocks the day automatically</li>
+        <li>Streaks, weekly rest days and a day off when you need one</li>
+        <li>An evening reminder, if you want one</li>
+      </ul>
+    </div>
+    <p class="fine">One plan. No free tier, no ads, no upsell. US price; your local price is shown in the app. The subscription renews automatically unless cancelled at least 24 hours before the end of the current period, and is managed in your Apple Account settings. Restore Purchases is always on the paywall.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Private by design</h2>
+    <p>Nivli has no account, no server, no analytics, no advertising and no third-party code; the only network traffic is Apple's own App Store, for the subscription. The apps you choose are handed to Nivli as opaque tokens, so Nivli can shield them without ever learning their names. If you connect Apple Health, Nivli reads your workouts on the iPhone and writes nothing back; that data never leaves the device. Your workout log, streak and settings live in Nivli's own storage on this iPhone and in your own device backup. Turn Nivli off or delete it and iOS lifts the shields. App Store privacy label: <strong>Data Not Collected</strong>.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <nav>
+      <a href="<<OWNER: App Store URL>>">App Store</a>
+      <a href="support.html">Support</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Terms of Use</a>
+    </nav>
+    <p>© 2026 &lt;&lt;OWNER: legal name&gt;&gt;. Nivli is not affiliated with Apple. Apple, iPhone, Apple Health and Apple Watch are trademarks of Apple Inc.</p>
+  </div>
+</footer>
+
+</body>
+</html>
