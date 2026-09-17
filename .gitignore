@@ -1,0 +1,17 @@
+.DS_Store
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+build/
+*.xcresult/
+*.ipa
+*.dSYM/
+*.p12
+*.p8
+*.mobileprovision
+.env
+.env.*
+!.env.example
+.swiftpm/
+.build/
+__pycache__/

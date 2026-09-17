@@ -1,0 +1,149 @@
+name: Nivli
+options:
+  bundleIdPrefix: com.bluepenguin
+  deploymentTarget:
+    iOS: "18.0"
+  xcodeVersion: "26.0"
+  generateEmptyDirectories: false
+  groupSortPosition: top
+settings:
+  base:
+    # Swift 5 language mode keeps concurrency diagnostics as warnings on the current compiler,
+    # so the app is verified on cloud Macs without a Swift 6 migration in the way.
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: 3.0.0
+    VERSIONING_SYSTEM: apple-generic
+    IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
+targets:
+  Nivli:
+    type: application
+    platform: iOS
+    sources:
+      - path: Nivli
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - target: NivliMonitor
+        embed: true
+      - target: NivliShield
+        embed: true
+    # Merged with the Xcode-generated Info.plist (GENERATE_INFOPLIST_FILE stays YES).
+    # Keys whose type matters live in Nivli/Info.plist; plain strings stay INFOPLIST_KEY_*.
+    #   ITSAppUsesNonExemptEncryption  HTTPS to Apple only; stops the export-compliance prompt
+    info:
+      path: Nivli/Info.plist
+      properties:
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bluepenguin.nivli
+        PRODUCT_NAME: Nivli
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nivli
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.healthcare-fitness
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        # The launch screen paints the canvas colour, not the system's black or white.
+        INFOPLIST_KEY_UILaunchScreen_BackgroundColor: NivliCanvas
+        # Apple's upload check (error 90474) wants the generic key as well as the iPhone one.
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        # Portrait-only apps must opt out of iPad multitasking, or Apple demands all four orientations.
+        INFOPLIST_KEY_UIRequiresFullScreen: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        # Read-only. Nivli looks for today's workouts so a run or a gym session recorded by
+        # Apple Watch or any fitness app unlocks the apps without a manual log.
+        INFOPLIST_KEY_NSHealthShareUsageDescription: Nivli reads your workouts from Apple Health so a workout you already recorded unlocks your apps for the day. Nothing is written to Health and nothing leaves your iPhone.
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Nivli"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_ENTITLEMENTS: Nivli/Nivli.entitlements
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
+    scheme:
+      gatherCoverageData: true
+      testTargets:
+        - NivliTests
+        - NivliUITests
+      # Target schemes take storeKitConfiguration at this level; it lands in the scheme's
+      # Run action, which Xcode also uses for the Test action.
+      storeKitConfiguration: Config/Nivli.storekit
+
+  # Re-applies the shields at the start of every day (00:00) while the app is closed.
+  # Nivli/Shared brings the App Group store, the policy and the ManagedSettings glue.
+  NivliMonitor:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: NivliMonitor
+      - path: Nivli/Shared
+    info:
+      path: NivliMonitor/Info.plist
+      properties:
+        CFBundleDisplayName: Nivli
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).DeviceActivityMonitorExtension"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bluepenguin.nivli.monitor
+        PRODUCT_NAME: NivliMonitor
+        CODE_SIGN_ENTITLEMENTS: NivliMonitor/NivliMonitor.entitlements
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nivli
+
+  # The branded screen iOS shows over a blocked app ("Move first.").
+  NivliShield:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: NivliShield
+      - path: Nivli/Shared
+    info:
+      path: NivliShield/Info.plist
+      properties:
+        CFBundleDisplayName: Nivli
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShieldConfigurationExtension"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bluepenguin.nivli.shield
+        PRODUCT_NAME: NivliShield
+        CODE_SIGN_ENTITLEMENTS: NivliShield/NivliShield.entitlements
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nivli
+
+  NivliTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - NivliTests
+    dependencies:
+      - target: Nivli
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bluepenguin.nivli.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+  NivliUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - NivliUITests
+    dependencies:
+      - target: Nivli
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bluepenguin.nivli.uitests
+        GENERATE_INFOPLIST_FILE: YES

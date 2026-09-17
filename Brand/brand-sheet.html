@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Nivli Brand Sheet</title>
+<style>
+:root{
+  color-scheme:light;
+  --paper:#F7F9FA; --surface:#FFFFFF; --surface-2:#EEF3F5; --ink:#142B39; --text:#1F3442; --muted:#5B6E7A; --line:#DCE4E8;
+  --accent:#11665D; --mint:#5EDCC0; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --display:ui-rounded,-apple-system,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ color-scheme:dark; --paper:#0E1418; --surface:#16202A; --surface-2:#1D2933; --ink:#EAF1F5; --text:#DCE6EC; --muted:#93A4AF; --line:#27343E; --accent:#5EDCC0; }
+}
+:root[data-theme="dark"]{ color-scheme:dark; --paper:#0E1418; --surface:#16202A; --surface-2:#1D2933; --ink:#EAF1F5; --text:#DCE6EC; --muted:#93A4AF; --line:#27343E; --accent:#5EDCC0; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--text);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+h1,h2,h3{font-family:var(--display);color:var(--ink);text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,4.5vw,44px);letter-spacing:-.02em;line-height:1.05}
+h2{font-size:24px;letter-spacing:-.01em}
+h3{font-size:17px}
+p{margin:0}
+.eyebrow{display:block;font:600 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.masthead{padding:48px 0 28px;border-bottom:1px solid var(--line);display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.masthead .lede{color:var(--muted);font-size:18px;max-width:56ch;margin-top:6px}
+.masthead .tag{font-family:var(--display);font-weight:700;color:var(--accent)}
+section{padding:36px 0;border-bottom:1px solid var(--line)}
+section p.intro{color:var(--muted);max-width:64ch;margin:8px 0 22px}
+.grid{display:grid;gap:16px}
+.lockups{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:12px;min-height:170px;justify-content:center}
+.tile.ink{background:#142B39;border-color:#142B39}
+.tile.white{background:#FFFFFF;border-color:#DCE4E8}
+.tile.black{background:#000;border-color:#000}
+.tile figcaption,.tile .cap{font:500 12px/1.3 var(--mono);color:var(--muted);text-align:center}
+.tile.ink .cap,.tile.black .cap{color:#9FB3BF}
+.swatches{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.swatch .chip{height:78px;border-radius:12px;display:flex;align-items:flex-end;padding:10px;font:600 12px var(--mono);border:1px solid rgba(0,0,0,.08)}
+.swatch strong{display:block;margin-top:8px;color:var(--ink)}
+.swatch span{display:block;font-size:13px;color:var(--muted)}
+.type{display:grid;grid-template-columns:1fr;gap:14px}
+.type .sample{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;border-top:1px solid var(--line);padding-top:12px}
+.type .sample .cap{font:500 12px/1.4 var(--mono);color:var(--muted)}
+.t-large{font:700 34px/1.1 var(--display);color:var(--ink)}
+.t-title{font:600 22px/1.2 var(--display);color:var(--ink)}
+.t-body{font:400 17px/1.5 var(--body)}
+.t-elapsed{font:700 40px/1 var(--display);font-variant-numeric:tabular-nums;color:var(--ink)}
+.t-foot{font:400 13px/1.4 var(--body);color:var(--muted)}
+.looks{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.look{border-radius:28px;padding:18px 16px 14px;display:flex;flex-direction:column;gap:12px;font-family:var(--body);box-shadow:0 24px 44px -28px rgba(0,0,0,.5)}
+.look.dark{--l-bg:#000;--l-card:#1C1C1E;--l-ink:#fff;--l-muted:#9A9AA0;--l-acc:#5EDCC0;--l-acc-ink:#0B2A22;--l-tint:#0F2A25;--l-tab:#141416;--l-field:#1C1C1E;--l-orange:#FF9F0A;--l-orange-bg:#3A2A12;--l-pillbg:#2C2C2E}
+.look.light{--l-bg:#F2F2F7;--l-card:#fff;--l-ink:#000;--l-muted:#6C6C70;--l-acc:#11665D;--l-acc-ink:#fff;--l-tint:#DCEFEA;--l-tab:#fff;--l-field:#E5E5EA;--l-orange:#C25E00;--l-orange-bg:#FFE9D2;--l-pillbg:#E5E5EA}
+.look{background:var(--l-bg);color:var(--l-ink)}
+.look-title{font:600 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--l-muted)}
+.phone-top{display:flex;justify-content:space-between;align-items:center;padding:2px 2px 0}
+.people{font-size:18px;background:var(--l-card);border-radius:50%;width:34px;height:34px;display:grid;place-items:center}
+.field{background:var(--l-field);border-radius:16px;padding:12px 14px;color:var(--l-muted);font-size:15px}
+.l-head{font:600 15px/1 var(--body);color:var(--l-muted);margin-top:4px}
+.card{background:var(--l-card);border-radius:18px;padding:4px 14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid rgba(128,128,128,.18)}
+.row:last-child{border-bottom:0}
+.row b{display:block;font-weight:600;font-size:15.5px}
+.row span{display:block;font-size:13px;color:var(--l-muted)}
+.pill{display:inline-block !important;white-space:nowrap;font-size:12.5px !important;font-weight:600;color:var(--l-ink) !important;background:var(--l-pillbg);border-radius:999px;padding:6px 10px}
+.pill.overdue{color:var(--l-orange) !important;background:var(--l-orange-bg)}
+.answer{padding:14px;display:flex;flex-direction:column;gap:6px}
+.answer .q{font-size:12.5px;color:var(--l-muted)}
+.answer b{font-size:16px;font-weight:600}
+.answer .ev{font-size:12.5px;color:var(--l-muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.actions button{font:600 13px var(--body);color:var(--l-acc);background:var(--l-tint);border:0;border-radius:999px;padding:8px 12px}
+.facts{display:flex;gap:8px;flex-wrap:wrap}
+.fact{background:var(--l-card);border-radius:12px;padding:8px 12px;font-size:13.5px}
+.fact em{font-style:normal;color:var(--l-muted);margin-right:6px}
+.fact.conflict{outline:1.5px solid var(--l-orange)}
+.btns{display:flex;gap:10px}
+.btns button{flex:1;border:0;border-radius:16px;padding:14px;font:600 16px var(--body)}
+.btns .primary{background:var(--l-acc);color:var(--l-acc-ink)}
+.btns .secondary{background:var(--l-tint);color:var(--l-acc)}
+.toast{align-self:center;display:flex;gap:14px;align-items:center;background:var(--l-card);border-radius:999px;padding:10px 16px;font-size:13.5px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.toast b{color:var(--l-acc)}
+.tabs{display:flex;justify-content:space-around;background:var(--l-tab);border-radius:999px;padding:8px;font-size:12px;color:var(--l-muted)}
+.tabs .on{color:var(--l-acc);font-weight:600}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.list{margin:8px 0 0;padding-left:20px;color:var(--text)}
+.list li{margin:6px 0}
+.files{width:100%;border-collapse:collapse;font-size:14px}
+.files th,.files td{text-align:left;padding:9px 10px;border-top:1px solid var(--line);vertical-align:top}
+.files th{font:600 11.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.files code{font:500 13px var(--mono);color:var(--ink)}
+footer{padding:26px 0 56px;color:var(--muted);font-size:14px}
+@media (max-width:640px){.wrap{padding:0 18px} .type .sample{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<header class="wrap masthead">
+  <svg viewBox="0 0 1024 1024" width="72" height="72" style="display:block;color:#fff" role="img" aria-label="Nivli app icon"><rect width="1024" height="1024" rx="224" fill="#142B39"/><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg>
+  <div>
+    <h1>Nivli brand sheet</h1>
+    <p class="lede">The mark, the icon, the colours, the type and the app's building blocks in both looks, with the rules that keep them consistent. <span class="tag">Remember when.</span></p>
+  </div>
+</header>
+
+<section class="wrap" id="mark">
+  <span class="eyebrow">the mark</span>
+  <h2>“Ni”: one N stroke, completed by a mint dot</h2>
+  <p class="intro">The right leg of the N stops short; the dot finishes it into an “i”. The dot is the moment something happened, the thing Nivli keeps for you. Stroke width is 92 on the 1024 grid with round caps, dot radius 50, and the overdue ring sits at radius 82. Nothing else is ever added to it.</p>
+  <div class="grid lockups">
+    <figure class="tile ink"><svg viewBox="256 218 556 532" height="84" style="color:#fff;display:block" role="img" aria-label="Nivli mark"><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg><figcaption class="cap">white on ink</figcaption></figure>
+    <figure class="tile white"><svg viewBox="256 218 556 532" height="84" style="color:#142B39;display:block" role="img" aria-label="Nivli mark"><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg><figcaption class="cap">ink on white</figcaption></figure>
+    <figure class="tile black"><svg viewBox="256 218 556 532" height="84" style="color:#fff;display:block" role="img" aria-label="Nivli mark with the overdue ring"><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/><circle cx="718" cy="312" r="82" fill="none" stroke="#5EDCC0" stroke-width="16"/></svg><figcaption class="cap">app, dark · something overdue</figcaption></figure>
+    <figure class="tile white"><svg viewBox="256 218 556 532" height="84" style="color:#142B39;display:block" role="img" aria-label="Nivli mark with the overdue ring on white"><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/><circle cx="718" cy="312" r="82" fill="none" stroke="#5EDCC0" stroke-width="16"/></svg><figcaption class="cap">app, light · something overdue</figcaption></figure>
+  </div>
+  <ul class="list">
+    <li><b>Clear space:</b> keep at least one dot-diameter (100 grid units) of empty space around the mark.</li>
+    <li><b>Smallest size:</b> 16 px tall on screen; below that use the dot alone as a bullet, never a shrunken N.</li>
+    <li><b>Colour:</b> white on ink or dark grounds, ink on white or paper. The dot is always mint.</li>
+  </ul>
+</section>
+
+<section class="wrap" id="icon">
+  <span class="eyebrow">the app icon</span>
+  <h2>Ink square, white N, mint dot</h2>
+  <p class="intro">The store and iOS apply their own corner mask, so the source icon is a plain square. The rounded version is for the website, documents and anywhere outside Apple's grid.</p>
+  <div class="grid lockups">
+    <figure class="tile"><svg viewBox="0 0 1024 1024" width="96" height="96" style="display:block;color:#fff" role="img" aria-label="Nivli app icon"><rect width="1024" height="1024" fill="#142B39"/><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg><figcaption class="cap">App Store source · 1024 square</figcaption></figure>
+    <figure class="tile"><svg viewBox="0 0 1024 1024" width="96" height="96" style="display:block;color:#fff" role="img" aria-label="Nivli app icon"><rect width="1024" height="1024" rx="224" fill="#142B39"/><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg><figcaption class="cap">web and print · rounded 224/1024</figcaption></figure>
+    <figure class="tile"><div style="display:flex;gap:14px;align-items:flex-end"><svg viewBox="0 0 1024 1024" width="64" height="64" style="display:block;color:#fff" role="img" aria-label="Nivli app icon"><rect width="1024" height="1024" rx="224" fill="#142B39"/><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg><svg viewBox="0 0 1024 1024" width="40" height="40" style="display:block;color:#fff" role="img" aria-label="Nivli app icon"><rect width="1024" height="1024" rx="224" fill="#142B39"/><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg><svg viewBox="0 0 1024 1024" width="24" height="24" style="display:block;color:#fff" role="img" aria-label="Nivli app icon"><rect width="1024" height="1024" rx="224" fill="#142B39"/><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg><svg viewBox="0 0 1024 1024" width="16" height="16" style="display:block;color:#fff" role="img" aria-label="Nivli app icon"><rect width="1024" height="1024" rx="224" fill="#142B39"/><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg></div><figcaption class="cap">64 · 40 · 24 · 16</figcaption></figure>
+    <figure class="tile ink"><div style="display:flex;gap:10px;align-items:center"><svg viewBox="256 218 556 532" height="30" style="color:#fff;display:block" role="img" aria-label="Nivli mark"><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/></svg><span style="font:700 26px var(--display);color:#fff;letter-spacing:-.02em">Nivli</span></div><figcaption class="cap">lockup: mark + name in the system rounded face</figcaption></figure>
+  </div>
+</section>
+
+<section class="wrap" id="colour">
+  <span class="eyebrow">colour</span>
+  <h2>Ink, mint, and one deeper teal for light screens</h2>
+  <p class="intro">Mint is too light to read on white, so the in-app accent is teal in the Light look and mint in the Dark look. Orange is reserved for “overdue”; it is a state, not a brand colour.</p>
+  <ul class="swatches">
+    <li class="swatch"><div class="chip" style="background:#142B39;color:#FFFFFF"><b>#142B39</b></div><strong>Ink</strong><span>icon ground, website hero, mark on light</span></li>
+    <li class="swatch"><div class="chip" style="background:#5EDCC0;color:#142B39"><b>#5EDCC0</b></div><strong>Mint</strong><span>the dot; accent and primary buttons in Dark</span></li>
+    <li class="swatch"><div class="chip" style="background:#11665D;color:#FFFFFF"><b>#11665D</b></div><strong>Teal</strong><span>accent and primary buttons in Light</span></li>
+    <li class="swatch"><div class="chip" style="background:#000000;color:#FFFFFF"><b>#000000</b></div><strong>Near-black</strong><span>app ground in Dark (the default look)</span></li>
+    <li class="swatch"><div class="chip" style="background:#1C1C1E;color:#FFFFFF"><b>#1C1C1E</b></div><strong>Card, dark</strong><span>cards, sheets and the widget in Dark</span></li>
+    <li class="swatch"><div class="chip" style="background:#F2F2F7;color:#142B39"><b>#F2F2F7</b></div><strong>Ground, light</strong><span>app ground in Light</span></li>
+    <li class="swatch"><div class="chip" style="background:#F7F9FA;color:#142B39"><b>#F7F9FA</b></div><strong>Paper</strong><span>website background</span></li>
+    <li class="swatch"><div class="chip" style="background:#FF9F0A;color:#142B39"><b>#FF9F0A</b></div><strong>Overdue</strong><span>system orange; the only warning colour</span></li>
+  </ul>
+</section>
+
+<section class="wrap" id="type">
+  <span class="eyebrow">type</span>
+  <h2>The system face, so the app reads like the iPhone</h2>
+  <p class="intro">No custom fonts. Titles and elapsed times use the rounded design; body text uses the standard text face with Dynamic Type. On this page the browser substitutes its own system font, so shapes differ slightly from the iPhone.</p>
+  <div class="type">
+    <div class="sample"><span class="cap">large title · rounded bold</span><span class="t-large">Remember when.</span></div>
+    <div class="sample"><span class="cap">title · rounded semibold</span><span class="t-title">Change air filter</span></div>
+    <div class="sample"><span class="cap">elapsed time · rounded, tabular digits</span><span class="t-elapsed">2 months, 2 weeks ago</span></div>
+    <div class="sample"><span class="cap">body · text face</span><span class="t-body">Nivli remembers when you last did something, and reminds you when it's time again.</span></div>
+    <div class="sample"><span class="cap">footnote · secondary</span><span class="t-foot">Sizes, brands, links, who did it, where it's kept. Siri answers from these.</span></div>
+  </div>
+</section>
+
+<section class="wrap" id="legos">
+  <span class="eyebrow">building blocks · both looks</span>
+  <h2>The pieces every screen is made of</h2>
+  <p class="intro">Search field, section headers, thing rows with a status pill, the answer card with its next steps, detail chips (a conflict gets the orange outline), the two button weights, the toast with Undo, and the tab bar. Dark is the default; Light and Match iPhone are in Settings.</p>
+  <div class="looks">
+<div class="look dark" aria-label="Dark (default) look">
+  <p class="look-title">Dark (default)</p>
+  <div class="phone-top">
+    <svg viewBox="256 218 556 532" height="26" style="color:var(--l-ink);display:block" role="img" aria-label="Nivli mark, something overdue"><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/><circle cx="718" cy="312" r="82" fill="none" stroke="#5EDCC0" stroke-width="16"/></svg>
+    <span class="people" aria-hidden="true">👥</span>
+  </div>
+  <div class="field">🔍 Search things</div>
+  <p class="l-head">Needs attention</p>
+  <div class="card">
+    <div class="row"><div><b>Test smoke alarms</b><span>Last: 6 months ago</span></div><span class="pill overdue">↻ Overdue by 2 weeks</span></div>
+  </div>
+  <p class="l-head">Everything else</p>
+  <div class="card">
+    <div class="row"><div><b>Change air filter</b><span>Last: 2 months, 2 weeks ago</span></div><span class="pill">↻ In 12 days</span></div>
+    <div class="row"><div><b>Renew passport</b><span>Not logged yet</span></div><span class="pill">🔔 In 11 months</span></div>
+  </div>
+  <div class="card answer">
+    <span class="q">when did I last water the plants</span>
+    <b>Water the plants: 3 days ago</b>
+    <span class="ev">From your history · Wed, Sep 9 at 17:58</span>
+    <div class="actions"><button type="button">Did it</button><button type="button">Remind me</button><button type="button">Share details</button></div>
+  </div>
+  <div class="facts"><span class="fact"><em>Size</em> 16 by 25 by 1</span><span class="fact"><em>Brand</em> Filtrete</span><span class="fact conflict"><em>Location</em> 2 values saved</span></div>
+  <div class="btns"><button type="button" class="primary">✓ Log now</button><button type="button" class="secondary">📅 Past date</button></div>
+  <div class="toast"><span>Logged Water the plants</span><b>Undo</b></div>
+  <div class="tabs"><span class="on">✓ Things</span><span>🕘 History</span><span>⚙ Settings</span></div>
+</div>
+<div class="look light" aria-label="Light look">
+  <p class="look-title">Light</p>
+  <div class="phone-top">
+    <svg viewBox="256 218 556 532" height="26" style="color:var(--l-ink);display:block" role="img" aria-label="Nivli mark, something overdue"><path d="M302 704V312L718 704V432" fill="none" stroke="currentColor" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/><circle cx="718" cy="312" r="50" fill="#5EDCC0"/><circle cx="718" cy="312" r="82" fill="none" stroke="#5EDCC0" stroke-width="16"/></svg>
+    <span class="people" aria-hidden="true">👥</span>
+  </div>
+  <div class="field">🔍 Search things</div>
+  <p class="l-head">Needs attention</p>
+  <div class="card">
+    <div class="row"><div><b>Test smoke alarms</b><span>Last: 6 months ago</span></div><span class="pill overdue">↻ Overdue by 2 weeks</span></div>
+  </div>
+  <p class="l-head">Everything else</p>
+  <div class="card">
+    <div class="row"><div><b>Change air filter</b><span>Last: 2 months, 2 weeks ago</span></div><span class="pill">↻ In 12 days</span></div>
+    <div class="row"><div><b>Renew passport</b><span>Not logged yet</span></div><span class="pill">🔔 In 11 months</span></div>
+  </div>
+  <div class="card answer">
+    <span class="q">when did I last water the plants</span>
+    <b>Water the plants: 3 days ago</b>
+    <span class="ev">From your history · Wed, Sep 9 at 17:58</span>
+    <div class="actions"><button type="button">Did it</button><button type="button">Remind me</button><button type="button">Share details</button></div>
+  </div>
+  <div class="facts"><span class="fact"><em>Size</em> 16 by 25 by 1</span><span class="fact"><em>Brand</em> Filtrete</span><span class="fact conflict"><em>Location</em> 2 values saved</span></div>
+  <div class="btns"><button type="button" class="primary">✓ Log now</button><button type="button" class="secondary">📅 Past date</button></div>
+  <div class="toast"><span>Logged Water the plants</span><b>Undo</b></div>
+  <div class="tabs"><span class="on">✓ Things</span><span>🕘 History</span><span>⚙ Settings</span></div>
+</div></div>
+</section>
+
+<section class="wrap" id="voice">
+  <span class="eyebrow">voice</span>
+  <div class="two">
+    <div>
+      <h2>How Nivli talks</h2>
+      <ul class="list">
+        <li>Short and human: “Last: 3 months ago”, “Did it”, “Tomorrow”.</li>
+        <li>States the resolved date and time: “set a reminder for Dec 12, 2026 at 9:00 AM”.</li>
+        <li>Says plainly when something isn't saved; never guesses or invents.</li>
+        <li>Sentence case. No exclamation marks. No “task”, “to-do” or “productivity”.</li>
+        <li>Buttons say exactly what happens: Log it, Save detail, Save all, Share details.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Do and don't</h2>
+      <ul class="list">
+        <li><b>Do</b> use the SVGs for marketing and the PNGs for apps and documents.</li>
+        <li><b>Do</b> keep mint as the one highlight, on ink or near-black.</li>
+        <li><b>Don't</b> add gradients, shadows, badges, text or a second mark to the icon.</li>
+        <li><b>Don't</b> recolour the dot, stretch the N, or put the mark on busy photos.</li>
+        <li><b>Don't</b> set mint body text on white; use teal.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="files">
+  <span class="eyebrow">the kit</span>
+  <h2>What's in the Brand folder</h2>
+  <table class="files">
+    <tr><th>File</th><th>Use it for</th></tr>
+    <tr><td><code>Nivli-Icon.svg</code>, <code>icon/Nivli-Icon-1024…60.png</code></td><td>App Store, TestFlight, any Apple surface (square; Apple rounds it).</td></tr>
+    <tr><td><code>icon/Nivli-Icon-Rounded.svg</code>, <code>icon/Nivli-Icon-Rounded-512…16.png</code></td><td>Website, decks, documents, social avatars.</td></tr>
+    <tr><td><code>mark/Nivli-Mark-Ink.svg</code>, <code>mark/Nivli-Mark-Ink-512…64.png</code></td><td>The mark on white or paper.</td></tr>
+    <tr><td><code>mark/Nivli-Mark-White.svg</code>, <code>mark/Nivli-Mark-White-512…64.png</code></td><td>The mark on ink, near-black or photos with a dark area.</td></tr>
+    <tr><td><code>mark/…-Attention…</code></td><td>The overdue state, as the app draws it. Product surfaces only.</td></tr>
+    <tr><td><code>favicon/favicon.svg</code>, <code>favicon-32.png</code>, <code>favicon-16.png</code>, <code>apple-touch-icon-180.png</code></td><td>The website's tab icon and home-screen bookmark.</td></tr>
+    <tr><td><code>BRAND.md</code></td><td>The written rules; <code>Scripts/render_icon.py</code> regenerates the app icon set.</td></tr>
+    <tr><td><code>brand-sheet.html</code></td><td>This page.</td></tr>
+  </table>
+</section>
+
+<footer class="wrap">Nivli · Brian Suchanek · generated from the icon geometry on 12 Sep 2026. Edit the source, not the exports.</footer>
+</body>
+</html>

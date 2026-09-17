@@ -1,0 +1,91 @@
+{
+  "identifier": "6F2C1A0E-4B7D-4E3A-9C1B-2D5E8F7A6B01",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "39.99",
+      "familyShareable": false,
+      "internalID": "1000000000000003",
+      "localizations": [
+        {
+          "description": "Nivli, forever.",
+          "displayName": "Nivli Lifetime",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.bluepenguin.nivli.plus.lifetime",
+      "referenceName": "Nivli+ Lifetime",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "0",
+    "_developerTeamID": "",
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": [
+      { "current": null, "enabled": false, "name": "Load Products" },
+      { "current": null, "enabled": false, "name": "Purchase" },
+      { "current": null, "enabled": false, "name": "Verification" },
+      { "current": null, "enabled": false, "name": "App Store Sync" },
+      { "current": null, "enabled": false, "name": "Subscription Status" },
+      { "current": null, "enabled": false, "name": "App Transaction" },
+      { "current": null, "enabled": false, "name": "Manage Subscriptions Sheet" },
+      { "current": null, "enabled": false, "name": "Refund Request Sheet" },
+      { "current": null, "enabled": false, "name": "Offer Code Redeem Sheet" }
+    ]
+  },
+  "subscriptionGroups": [
+    {
+      "id": "21000001",
+      "localizations": [],
+      "name": "Nivli+",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "2.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "1000000000000001",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "Unlock your apps by moving first.",
+              "displayName": "Nivli Monthly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.bluepenguin.nivli.plus.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Nivli+ Monthly",
+          "subscriptionGroupID": "21000001",
+          "type": "RecurringSubscription"
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "19.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "1000000000000002",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "Unlock your apps by moving first.",
+              "displayName": "Nivli Yearly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.bluepenguin.nivli.plus.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Nivli+ Yearly",
+          "subscriptionGroupID": "21000001",
+          "type": "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version": { "major": 3, "minor": 0 }
+}

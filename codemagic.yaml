@@ -1,0 +1,264 @@
+# Nivli 3.0 — Codemagic pipelines (no Mac required).
+#
+# Workflows:
+#   ios-compile    Fast compile check of the app + both extensions (no tests). Needs no Apple
+#                  credentials. Runs automatically on every push. Use it while fixing errors.
+#   ios-unit       Compile + the unit tests (about 15 min). Start manually, or it runs on
+#                  every push to a claude/* branch.
+#   ios-verify     Compile + unit + UI tests (about 25 min). Start manually.
+#   ios-testflight Signs the app with your Apple account and uploads a build to TestFlight.
+#   ios-appstore   Same as ios-testflight but also attaches the build to App Store Connect
+#                  for a manual release. Start it manually when you are ready to submit.
+#
+# The signed workflows need an environment variable group named `appstore_credentials`
+# (Codemagic → Teams → Environment variables) with these secure variables:
+# APP_STORE_CONNECT_PRIVATE_KEY, APP_STORE_CONNECT_KEY_IDENTIFIER, APP_STORE_CONNECT_ISSUER_ID,
+# plus CERTIFICATE_PRIVATE_KEY (an RSA key Codemagic uses to create and reuse the
+# distribution certificate). The same group from the previous Nivli build still works.
+#
+# Before the first signed build the owner must switch on capabilities in the Apple
+# Developer portal (Codemagic creates App IDs but never enables capabilities):
+#   com.bluepenguin.nivli          App Groups (group.com.bluepenguin.nivli)
+#                                  + HealthKit + Family Controls (Distribution)
+#   com.bluepenguin.nivli.monitor  App Groups + Family Controls (Distribution)
+#   com.bluepenguin.nivli.shield   App Groups + Family Controls (Distribution)
+# "Family Controls (Distribution)" only appears in the portal after Apple approves the
+# request at https://developer.apple.com/contact/request/family-controls-distribution
+# (Docs/HANDOFF.md step 1). A profile without it fails at signing.
+
+definitions:
+  environment: &base_env
+    xcode: "26.6"
+    vars:
+      XCODE_PROJECT: "Nivli.xcodeproj"
+      XCODE_SCHEME: "Nivli"
+      BUNDLE_ID: "com.bluepenguin.nivli"
+      MONITOR_BUNDLE_ID: "com.bluepenguin.nivli.monitor"
+      SHIELD_BUNDLE_ID: "com.bluepenguin.nivli.shield"
+  scripts:
+    - &install_xcodegen
+      name: Install XcodeGen
+      script: brew install xcodegen
+    - &preflight
+      name: Preflight (packaging, privacy, hygiene)
+      script: python3 Scripts/preflight.py
+    - &generate
+      name: Generate Xcode project
+      script: |
+        mkdir -p /tmp/xcodebuild_logs
+        xcodegen generate
+        xcodebuild -version
+    - &pick_simulator
+      name: Pick an iPhone simulator
+      script: |
+        SIM_ID=$(xcrun simctl list devices available -j | python3 -c '
+        import json, sys
+        data = json.load(sys.stdin)
+        phones = [d for key, devices in data["devices"].items() if "iOS" in key
+                  for d in devices if d["name"].startswith("iPhone") and d.get("isAvailable")]
+        phones.sort(key=lambda d: d["name"])
+        print(phones[-1]["udid"] if phones else "")')
+        if [ -z "$SIM_ID" ]; then echo "No iPhone simulator found"; exit 1; fi
+        echo "Using simulator: $SIM_ID"
+        echo "SIM_ID=$SIM_ID" >> $CM_ENV
+    - &build_unsigned
+      name: Build app + both extensions (unsigned, simulator)
+      script: |
+        set -o pipefail
+        xcodebuild build \
+          -project "$XCODE_PROJECT" \
+          -scheme "$XCODE_SCHEME" \
+          -sdk iphonesimulator \
+          -destination 'generic/platform=iOS Simulator' \
+          -configuration Debug \
+          CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+          | tee /tmp/xcodebuild_logs/nivli-build.log
+    - &run_unit_tests
+      name: Run unit tests
+      script: |
+        set -o pipefail
+        xcodebuild test \
+          -project "$XCODE_PROJECT" \
+          -scheme "$XCODE_SCHEME" \
+          -destination "platform=iOS Simulator,id=$SIM_ID" \
+          -only-testing:NivliTests \
+          CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+          | tee /tmp/xcodebuild_logs/nivli-unit-tests.log
+    - &run_all_tests
+      name: Run unit + UI tests
+      script: |
+        set -o pipefail
+        xcodebuild test \
+          -project "$XCODE_PROJECT" \
+          -scheme "$XCODE_SCHEME" \
+          -destination "platform=iOS Simulator,id=$SIM_ID" \
+          -resultBundlePath /tmp/xcodebuild_logs/Nivli.xcresult \
+          CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+          | tee /tmp/xcodebuild_logs/nivli-all-tests.log
+    - &fetch_signing
+      # All three bundle IDs need their own App Store provisioning profile; --create registers
+      # the App IDs if missing, but the capabilities listed at the top of this file must already
+      # be ticked on them by the owner.
+      name: Fetch or create App Store signing files (app + monitor + shield)
+      script: |
+        set -e
+        NORMALIZED=$(python3 "$CM_BUILD_DIR/Scripts/normalize_p8.py") || {
+          echo "APP_STORE_CONNECT_PRIVATE_KEY is not an App Store Connect .p8 key."
+          echo "Open the downloaded .p8 key file in a text editor, copy everything from its"
+          echo "first BEGIN line to its last END line, and paste that as the variable value."
+          exit 1
+        }
+        export APP_STORE_CONNECT_PRIVATE_KEY="$NORMALIZED"
+        if [ -z "$APP_STORE_CONNECT_KEY_IDENTIFIER" ] || [ -z "$APP_STORE_CONNECT_ISSUER_ID" ]; then
+          echo "APP_STORE_CONNECT_KEY_IDENTIFIER or APP_STORE_CONNECT_ISSUER_ID is empty."; exit 1
+        fi
+        if [ -z "$CERTIFICATE_PRIVATE_KEY" ]; then
+          echo "CERTIFICATE_PRIVATE_KEY is missing from the appstore_credentials group."
+          echo "See Docs/CODEMAGIC.md section 4b: it is a plain RSA key, not the App Store Connect .p8."
+          exit 1
+        fi
+        export CERTIFICATE_PRIVATE_KEY="$(printf '%s' "$CERTIFICATE_PRIVATE_KEY" | tr -d '\r')"
+        keychain initialize
+        app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+        app-store-connect fetch-signing-files "$MONITOR_BUNDLE_ID" --type IOS_APP_STORE --create
+        app-store-connect fetch-signing-files "$SHIELD_BUNDLE_ID" --type IOS_APP_STORE --create
+        keychain add-certificates
+        xcode-project use-profiles --project "$CM_BUILD_DIR/$XCODE_PROJECT"
+    - &set_build_number
+      # 100 + Codemagic's build counter, so no build number can collide with the previous
+      # Nivli app's uploads (its last build was 14).
+      name: Set build number
+      script: |
+        cd "$CM_BUILD_DIR"
+        agvtool new-version -all "$((100 + BUILD_NUMBER))"
+    - &build_ipa
+      name: Build signed IPA
+      script: |
+        xcode-project build-ipa \
+          --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+          --scheme "$XCODE_SCHEME"
+  artifacts: &release_artifacts
+    - build/ios/ipa/*.ipa
+    - /tmp/xcodebuild_logs/*.log
+    - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
+workflows:
+  ios-compile:
+    name: iOS Compile — Fast check
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      <<: *base_env
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: "main"
+          include: true
+          source: true
+      cancel_previous_builds: true
+    scripts:
+      - *install_xcodegen
+      - *preflight
+      - *generate
+      - *build_unsigned
+    artifacts:
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/Products/Debug-iphonesimulator/Nivli.app
+
+  ios-unit:
+    name: iOS Unit — Build + unit tests
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    environment:
+      <<: *base_env
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: "claude/*"
+          include: true
+          source: true
+      cancel_previous_builds: true
+    scripts:
+      - *install_xcodegen
+      - *preflight
+      - *generate
+      - *pick_simulator
+      - *run_unit_tests
+    artifacts:
+      - /tmp/xcodebuild_logs/*.log
+
+  ios-verify:
+    name: iOS Verify — Build + all tests
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      <<: *base_env
+    scripts:
+      - *install_xcodegen
+      - *preflight
+      - *generate
+      - *pick_simulator
+      - *build_unsigned
+      - *run_all_tests
+    artifacts:
+      - /tmp/xcodebuild_logs/*.log
+      - /tmp/xcodebuild_logs/*.xcresult
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/Products/Debug-iphonesimulator/Nivli.app
+
+  ios-testflight:
+    name: iOS Release — Sign + TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 90
+    environment:
+      <<: *base_env
+      groups:
+        - appstore_credentials
+    scripts:
+      - *install_xcodegen
+      - *preflight
+      - *generate
+      - *pick_simulator
+      - *run_unit_tests
+      - *fetch_signing
+      - *set_build_number
+      - *build_ipa
+    artifacts: *release_artifacts
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: false
+        submit_to_app_store: false
+
+  ios-appstore:
+    name: iOS Release — Submit build to App Store Connect
+    instance_type: mac_mini_m2
+    max_build_duration: 90
+    environment:
+      <<: *base_env
+      groups:
+        - appstore_credentials
+    scripts:
+      - *install_xcodegen
+      - *preflight
+      - *generate
+      - *pick_simulator
+      - *run_unit_tests
+      - *fetch_signing
+      - *set_build_number
+      - *build_ipa
+    artifacts: *release_artifacts
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+        submit_to_app_store: true
+        # MANUAL keeps you in control: the build is attached to the App Store version and
+        # you press "Submit for Review" in App Store Connect after filling in metadata.
+        release_type: MANUAL

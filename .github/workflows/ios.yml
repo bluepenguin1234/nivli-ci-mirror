@@ -1,0 +1,40 @@
+# Secondary compile check on GitHub-hosted Macs. Codemagic (codemagic.yaml) is the
+# primary pipeline. On a private repository macOS minutes are billed at 10x and the
+# account must have Actions billing enabled, so this workflow is manual-only.
+name: iOS Verification
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  packaging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 Scripts/preflight.py
+  ios:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphonesimulator --show-sdk-version
+      - name: Generate project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Build and test
+        run: bash Scripts/test-ios.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-results
+          path: |
+            build/*.xcresult
+            build/*.log
+          if-no-files-found: ignore
