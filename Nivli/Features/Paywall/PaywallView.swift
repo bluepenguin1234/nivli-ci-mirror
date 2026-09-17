@@ -6,6 +6,10 @@ import SwiftUI
 /// Two modes, one layout. At the end of onboarding it is the last page and has no way out
 /// except buying or restoring; opened later from Home or Settings it is a sheet with a close
 /// button. Price, period and any introductory offer come from StoreKit, never from a literal.
+///
+/// Nobody is ever trapped here. If the App Store cannot be reached twice in a row, the
+/// onboarding paywall offers a way through without paying — nothing is locked until there is
+/// a subscription, so letting somebody past costs nothing and being stuck costs everything.
 struct PaywallView: View {
     enum Mode: Equatable {
         /// The final onboarding step. Success finishes onboarding; there is no close button.
@@ -26,6 +30,8 @@ struct PaywallView: View {
     @State private var purchaseError: UserFacingError?
     @State private var notice: String?
     @State private var isRestoring = false
+    /// How many times loading the products has come back empty-handed on this screen.
+    @State private var failedLoads = 0
 
     private var store: SubscriptionStore { model.subscriptions }
 
@@ -33,9 +39,9 @@ struct PaywallView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 heading
-                benefits
+                PaywallBenefits()
                 planSection
-                legal
+                PaywallLegal()
             }
             .padding(.horizontal, Theme.screenPadding)
             .padding(.top, 8)
@@ -51,7 +57,7 @@ struct PaywallView: View {
                 finish()
                 return
             }
-            if store.products.isEmpty { await store.loadProducts() }
+            if store.products.isEmpty { await reload() }
         }
         .onChange(of: model.isSubscribed) { _, subscribed in
             if subscribed { finish() }
@@ -90,36 +96,20 @@ struct PaywallView: View {
         }
     }
 
-    private var benefits: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            BenefitRow(
-                systemImage: "lock.fill",
-                title: "The apps you chose stay shut",
-                detail: "Until a workout says otherwise. Nivli never sees which apps they are."
-            )
-            BenefitRow(
-                systemImage: "heart.fill",
-                title: "Apple Health unlocks them for you",
-                detail: "A Watch run or a gym session opens everything without opening Nivli."
-            )
-            BenefitRow(
-                systemImage: "flame.fill",
-                title: "Streaks that make it stick",
-                detail: "Rest days are yours to take. The streak survives them."
-            )
-        }
-    }
-
     @ViewBuilder
     private var planSection: some View {
         if let error = store.loadError {
             InlineNotice(title: error.title, message: error.message)
             Button("Try again") {
-                Task { await store.loadProducts() }
+                Task { await reload() }
             }
             .buttonStyle(.quiet)
+            escapeHatch
         } else if let product = store.monthlyProduct {
-            planCard(for: product)
+            PaywallPlanCard(
+                priceLine: store.priceLine(for: product),
+                introductoryOfferLine: store.introductoryOfferLine(for: product)
+            )
             purchaseControls(for: product)
         } else if store.isLoadingProducts {
             ProgressView()
@@ -132,29 +122,24 @@ struct PaywallView: View {
                 message: "Check your connection and try again."
             )
             Button("Try again") {
-                Task { await store.loadProducts() }
+                Task { await reload() }
             }
             .buttonStyle(.quiet)
+            escapeHatch
         }
     }
 
-    private func planCard(for product: Product) -> some View {
-        SurfaceCard {
-            VStack(alignment: .leading, spacing: 10) {
-                Text(AppConfig.appName)
-                    .font(.title3.weight(.bold))
-                Text(store.priceLine(for: product))
-                    .font(Theme.numeral(.title2))
-                    .foregroundStyle(Color.accentColor)
-                if let offer = store.introductoryOfferLine(for: product) {
-                    Text(offer)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Chip(text: "Cancel anytime", systemImage: "checkmark.circle.fill", tint: .accentColor)
-                    .padding(.top, 2)
-            }
+    /// The way out of a paywall that cannot load. Only in onboarding, where there is no close
+    /// button; the resubscribe sheet already has one.
+    @ViewBuilder
+    private var escapeHatch: some View {
+        if failedLoads >= 2 && mode == .onboarding {
+            Button("Continue without subscribing") { model.completeOnboarding() }
+                .buttonStyle(.plainLink)
+            Text("Nothing will be locked until you subscribe.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -195,22 +180,13 @@ struct PaywallView: View {
         }
     }
 
-    private var legal: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Payment is charged to your Apple Account at confirmation. The subscription renews automatically each month at the same price unless cancelled at least 24 hours before the end of the period. Manage or cancel in Settings › Apple Account › Subscriptions.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            HStack(spacing: 18) {
-                Link("Terms of Use", destination: AppConfig.termsURL)
-                Link("Privacy Policy", destination: AppConfig.privacyURL)
-            }
-            .font(.caption.weight(.semibold))
-        }
-    }
-
     // MARK: - Actions
+
+    /// One load of the products, counting the failures so the escape hatch can appear.
+    private func reload() async {
+        await store.loadProducts()
+        if store.loadError != nil { failedLoads += 1 }
+    }
 
     private func buy(_ product: Product) {
         purchaseError = nil

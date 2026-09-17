@@ -42,7 +42,7 @@ struct HealthPage: View {
                         .font(.body.weight(.semibold))
                     Spacer(minLength: 8)
                     if model.state.healthEnabled {
-                        Chip(text: "Connected", systemImage: "checkmark.circle.fill", tint: .accentColor)
+                        Chip(text: "On", systemImage: "checkmark.circle.fill", tint: .accentColor)
                     }
                 }
 

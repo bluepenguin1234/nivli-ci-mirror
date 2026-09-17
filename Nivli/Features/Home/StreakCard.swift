@@ -6,6 +6,10 @@ import SwiftUI
 struct StreakCard: View {
     @Environment(AppModel.self) private var model
 
+    /// The streak is the biggest number on Home, so it follows the text size the person
+    /// chose instead of staying at 56 points while everything around it grows.
+    @ScaledMetric(relativeTo: .largeTitle) private var streakSize: CGFloat = 56
+
     var body: some View {
         SurfaceCard {
             VStack(alignment: .leading, spacing: 22) {
@@ -16,7 +20,7 @@ struct StreakCard: View {
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: -2) {
                         Text("\(model.streak)")
-                            .font(.system(size: 56, weight: .bold, design: .rounded))
+                            .font(.system(size: streakSize, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .contentTransition(.numericText())
                             .animation(.snappy, value: model.streak)

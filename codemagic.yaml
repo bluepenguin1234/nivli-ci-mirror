@@ -42,6 +42,9 @@ definitions:
     - &preflight
       name: Preflight (packaging, privacy, hygiene)
       script: python3 Scripts/preflight.py
+    - &preflight_release
+      name: Preflight (packaging, privacy, hygiene, owner placeholders)
+      script: python3 Scripts/preflight.py --release
     - &generate
       name: Generate Xcode project
       script: |
@@ -218,7 +221,7 @@ workflows:
         - appstore_credentials
     scripts:
       - *install_xcodegen
-      - *preflight
+      - *preflight_release
       - *generate
       - *pick_simulator
       - *run_unit_tests
@@ -244,7 +247,7 @@ workflows:
         - appstore_credentials
     scripts:
       - *install_xcodegen
-      - *preflight
+      - *preflight_release
       - *generate
       - *pick_simulator
       - *run_unit_tests

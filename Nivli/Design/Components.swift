@@ -123,6 +123,7 @@ struct Chip: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .background(tint.opacity(0.14), in: Capsule())
+        .minimumScaleFactor(0.8)
         .lineLimit(1)
     }
 }

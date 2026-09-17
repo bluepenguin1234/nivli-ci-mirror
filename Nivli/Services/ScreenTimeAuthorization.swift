@@ -44,20 +44,37 @@ final class ScreenTimeAuthorization {
 
     /// Asks iOS for permission for this person's own device. Shows the system sheet once;
     /// afterwards it resolves immediately from whatever was chosen then.
+    ///
+    /// A refusal throws rather than returning, and leaves the system status at
+    /// `.notDetermined`, so the answer is read back from the system either way and a
+    /// still-undecided status after the sheet has been through is recorded as the denial it
+    /// is. That is what puts "Allow Screen Time" and the explanation on screen instead of a
+    /// button that silently does nothing. The error itself is only ever logged: an Apple
+    /// error string tells the person nothing they can act on.
     func request() async {
         isRequesting = true
         defer { isRequesting = false }
+        #if targetEnvironment(simulator)
+        var isUnavailable = false
+        #endif
         do {
             try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
-            refresh()
         } catch {
             logger.error("Screen Time authorization failed: \(error.localizedDescription, privacy: .public)")
             #if targetEnvironment(simulator)
-            status = .unavailable(Self.unavailableMessage)
-            #else
-            status = .unavailable(error.localizedDescription)
+            isUnavailable = true
             #endif
         }
+        refresh()
+        #if targetEnvironment(simulator)
+        if isUnavailable {
+            status = .unavailable(Self.unavailableMessage)
+        }
+        #else
+        if case .notDetermined = status {
+            status = .denied
+        }
+        #endif
     }
 
     /// The sentence for a device that cannot do this at all — which in practice means the

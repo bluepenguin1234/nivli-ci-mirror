@@ -106,7 +106,25 @@ final class HealthKitService: @unchecked Sendable {
             if let error {
                 logger.error("Background delivery failed: \(error.localizedDescription, privacy: .public)")
             } else {
-                logger.log("Health background delivery enabled=\(enabled)")
+                logger.log("Health background delivery enabled=\(enabled, privacy: .private)")
+            }
+        }
+    }
+
+    /// The off switch. Stops the observer and hands background delivery back to iOS, so
+    /// turning Apple Health off in Settings really does stop Nivli waking for workouts —
+    /// iOS keeps delivering to an app that never disabled it, whatever the app's own
+    /// settings say. Safe to call when nothing is running.
+    func stopObserving() {
+        if let existing = observerQuery {
+            store.stop(existing)
+            observerQuery = nil
+        }
+        store.disableAllBackgroundDelivery { [logger] _, error in
+            if let error {
+                logger.error("Background delivery could not be disabled: \(error.localizedDescription, privacy: .public)")
+            } else {
+                logger.log("Health background delivery disabled")
             }
         }
     }

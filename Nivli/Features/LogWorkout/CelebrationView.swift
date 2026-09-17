@@ -11,6 +11,11 @@ struct CelebrationView: View {
 
     @State private var hasArrived = false
 
+    /// The check and the disc behind it follow the person's text size, so the celebration
+    /// reads the same at every Dynamic Type setting.
+    @ScaledMetric(relativeTo: .largeTitle) private var checkSize: CGFloat = 58
+    @ScaledMetric(relativeTo: .largeTitle) private var discSize: CGFloat = 132
+
     private static let pieceCount = 40
 
     var body: some View {
@@ -38,9 +43,9 @@ struct CelebrationView: View {
             ZStack {
                 Circle()
                     .fill(Theme.mint.opacity(0.16))
-                    .frame(width: 132, height: 132)
+                    .frame(width: discSize, height: discSize)
                 Image(systemName: "checkmark")
-                    .font(.system(size: 58, weight: .bold))
+                    .font(.system(size: checkSize, weight: .bold))
                     .foregroundStyle(Theme.mint)
             }
             .scaleEffect(hasArrived ? 1 : 0.6)

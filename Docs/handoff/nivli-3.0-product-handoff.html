@@ -163,11 +163,15 @@ ul.sub li::before{content:"";position:absolute;left:0;top:10px;width:5px;height:
 }
 .step h3{margin:0 0 6px;font-size:16px;letter-spacing:-.005em}
 .step p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
-@media (max-width:720px){
+@media (max-width:900px){
+  .step{padding:20px 16px}
+  .step .n{font-size:38px;margin-bottom:8px}
+}
+@media (max-width:860px){
   .timeline{grid-template-columns:1fr}
-  .step{border-left:0;border-top:1px solid var(--line);padding:20px 18px}
+  .step{border-left:0;border-top:1px solid var(--line);padding:18px}
   .step:first-child{border-top:0}
-  .step .n{font-size:34px;margin-bottom:6px}
+  .step .n{font-size:32px;margin-bottom:4px}
 }
 
 /* ---------- screen cards ---------- */

@@ -3,30 +3,12 @@ import FamilyControls
 import Observation
 import os
 
-/// Something that went wrong, said in the person's language. Shown inline; never a crash.
-struct UserFacingError: Error, Equatable {
-    let title: String
-    let message: String
-}
-
-/// What happened when a workout was logged, for the celebration and the Home refresh.
-struct LogResult: Equatable {
-    let entry: WorkoutEntry
-    /// The apps are open now (and were not before this log, or were already open).
-    let unlocked: Bool
-    /// The entry is shorter than the person's minimum, so it is kept but unlocks nothing.
-    let underMinimum: Bool
-    let streak: Int
-    /// A milestone hit by this log (3, 7, 14, …), for the confetti. `nil` otherwise.
-    let milestone: Int?
-}
-
 /// The one object every screen talks to. Owns the in-memory mirror of the shared state,
 /// the services, and the derived numbers (decision, streak, week strip), and is the only
 /// place that writes to `SharedStore` from the app.
 ///
 /// Rule of thumb: views read properties and call one method; they never touch a service
-/// or the store directly.
+/// or the store directly. Everything Apple Health lives in `AppModel+Health.swift`.
 @MainActor
 @Observable
 final class AppModel {
@@ -36,8 +18,8 @@ final class AppModel {
     let screenTime: ScreenTimeAuthorization
     let notifications: NotificationService
     private let shields: ShieldController
-    private let calendar: Calendar
-    private let logger = Logger(subsystem: "com.bluepenguin.nivli", category: "app")
+    let calendar: Calendar
+    let logger = Logger(subsystem: "com.bluepenguin.nivli", category: "app")
 
     /// The last state loaded from or written to the shared store.
     private(set) var state: NivliState
@@ -83,17 +65,6 @@ final class AppModel {
 
     // MARK: - Lifecycle
 
-    /// Called synchronously from the app's initialiser, before any view exists. Health
-    /// background delivery only reaches an app that re-registers its observer query at
-    /// process launch, and iOS may launch Nivli in the background for exactly that reason,
-    /// so the observer cannot wait for the first screen's `.task`.
-    func prepareForLaunch() {
-        guard state.healthEnabled else { return }
-        health.startObserving { [weak self] in
-            await self?.healthDidChange()
-        }
-    }
-
     /// Called once from the app's `.task`: starts StoreKit, Health observing, and does the
     /// first refresh. Safe to call again.
     func start() async {
@@ -102,6 +73,13 @@ final class AppModel {
         }
         await subscriptions.start()
         screenTime.refresh()
+        // The midnight re-lock is a `DeviceActivity` schedule iOS can drop — after a restart,
+        // an update, or a spell without permission. Re-arming it at every launch is cheap
+        // and idempotent, and it is the difference between apps that lock again tonight and
+        // apps that quietly stay open forever.
+        if state.onboardingComplete, state.hasSelection, screenTime.status == .approved {
+            startDailyMonitoring()
+        }
         prepareForLaunch()
         await refresh()
     }
@@ -109,8 +87,14 @@ final class AppModel {
     /// Reload the shared state, pull today's Health workouts, recompute, and set the shields
     /// to match. Called on every foreground and after anything changes elsewhere.
     func refresh() async {
+        // Permission may have been granted (or taken away) in iOS Settings while Nivli was in
+        // the background, and nothing tells the app about it.
+        screenTime.refresh()
         state = sharedStore.load()
-        await importHealthWorkouts()
+        if let merged = await mergedHealthWorkouts() {
+            sharedStore.save(merged)
+            state = merged
+        }
         recompute()
         applyShields()
     }
@@ -136,7 +120,7 @@ final class AppModel {
         applyShields()
         let unlocked = wasLocked && !decision.isLocked
         let milestone = unlocked ? StreakEngine.milestoneReached(streak: streak) : nil
-        logger.log("Manual workout logged (\(minutes) min); unlocked=\(unlocked)")
+        logger.log("Manual workout logged (\(minutes, privacy: .private) min); unlocked=\(unlocked, privacy: .private)")
         return LogResult(
             entry: entry,
             unlocked: unlocked,
@@ -164,20 +148,6 @@ final class AppModel {
         update { $0.oneOffRestDays.insert(today) }
     }
 
-    /// Ask for Health access; on success import today's workouts and start observing.
-    @discardableResult
-    func connectHealth() async -> Bool {
-        let granted = await health.requestAccess()
-        update { $0.healthEnabled = granted }
-        if granted {
-            health.startObserving { [weak self] in
-                await self?.healthDidChange()
-            }
-            await refresh()
-        }
-        return granted
-    }
-
     /// Turn the evening nudge on or off, asking for permission when turning it on.
     @discardableResult
     func setReminder(enabled: Bool, minutesFromMidnight: Int) async -> Bool {
@@ -198,10 +168,14 @@ final class AppModel {
 
     /// Removes every shield and forgets everything Nivli stored (Settings → Reset).
     func resetEverything() {
+        health.stopObserving()
         shields.clear()
         ActivitySchedule.stopMonitoring()
         notifications.cancelEveningNudge()
         sharedStore.reset()
+        // The appearance lives in standard defaults rather than the App Group, so the shared
+        // store's own reset cannot reach it.
+        UserDefaults.standard.removeObject(forKey: AppearanceSetting.key)
         state = sharedStore.load()
         recompute()
     }
@@ -216,7 +190,7 @@ final class AppModel {
 
     var isSubscribed: Bool {
         guard let until = state.entitlementValidUntil else { return false }
-        return until > Date()
+        return until >= Date()
     }
 
     var today: DayKey { DayKey.today(calendar: calendar) }
@@ -242,7 +216,8 @@ final class AppModel {
     }
 
     /// Keeps the evening nudge honest: once today is unlocked (or is a rest day) the next
-    /// nudge is tomorrow's, not tonight's.
+    /// nudge is tomorrow's, not tonight's. This runs on every refresh, which is what keeps
+    /// the whole week ahead scheduled.
     private func rescheduleNudge() {
         guard state.onboardingComplete, state.reminderEnabled else { return }
         notifications.scheduleEveningNudge(
@@ -250,26 +225,6 @@ final class AppModel {
             skipToday: !decision.isLocked,
             calendar: calendar
         )
-    }
-
-    private func importHealthWorkouts() async {
-        guard state.healthEnabled, health.isAvailable else { return }
-        let entries = await health.workoutsToday(calendar: calendar)
-        guard !entries.isEmpty else { return }
-        let merged = StreakEngine.mergingHealthWorkouts(state, entries)
-        guard !merged.added.isEmpty else { return }
-        sharedStore.save(merged.state)
-        state = merged.state
-        logger.log("Imported \(merged.added.count) Health workout(s)")
-    }
-
-    /// Health delivered a new sample (possibly while the app is in the background).
-    private func healthDidChange() async {
-        let wasLocked = decision.isLocked
-        await refresh()
-        if wasLocked && !decision.isLocked {
-            notifications.postUnlocked(streak: streak)
-        }
     }
 
     private func startDailyMonitoring() {

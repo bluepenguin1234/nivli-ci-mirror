@@ -3,6 +3,17 @@
 
 They complement, and never replace, the Xcode build and test gates that run on
 Codemagic. Exit code is non-zero on the first failure.
+
+Usage:
+    python3 Scripts/preflight.py             every check below
+    python3 Scripts/preflight.py --release   the same, plus the release gate
+
+The release gate (check 14) refuses any `<<OWNER: ...>>` placeholder left in the
+website or the App Store listing, escaped or not. It is deliberately not part of
+the default run: the placeholders are expected while the owner has not filled in
+their legal name and contact details yet, and only a build that is on its way to
+App Store Connect must not carry them. Codemagic therefore runs `--release` in the
+ios-testflight and ios-appstore workflows only.
 """
 from pathlib import Path
 import json
@@ -31,6 +42,12 @@ checks = 0
 def fail(message):
     print(f"FAIL: {message}")
     sys.exit(1)
+
+
+RELEASE = "--release" in sys.argv[1:]
+for argument in sys.argv[1:]:
+    if argument != "--release":
+        fail(f"unknown argument {argument}; the only option is --release")
 
 
 def tracked_files():
@@ -279,4 +296,19 @@ for path in (ROOT / "Nivli/Shared").rglob("*.swift"):
         fail(f"{path}: Nivli/Shared is compiled into the extensions and must not use app-only frameworks")
 checks += 1
 
-print(f"PASS: {checks} packaging, privacy, asset and hygiene checks. Xcode build/test runs on Codemagic.")
+# 14. Release gate (--release only): nothing that ships may still carry an owner placeholder.
+if RELEASE:
+    placeholder = re.compile(r"<<OWNER|&lt;&lt;OWNER")
+    scanned = [path for path in (ROOT / "Web").rglob("*") if path.is_file()]
+    listing_path = ROOT / "AppStore/LISTING.md"
+    if listing_path.exists():
+        scanned.append(listing_path)
+    for path in sorted(scanned):
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        for number, line in enumerate(text.splitlines(), 1):
+            if placeholder.search(line):
+                fail(f"{path.relative_to(ROOT)}:{number}: fill in the <<OWNER ...>> placeholder before release")
+    checks += 1
+
+mode = "release" if RELEASE else "standard"
+print(f"PASS: {checks} packaging, privacy, asset and hygiene checks ({mode}). Xcode build/test runs on Codemagic.")

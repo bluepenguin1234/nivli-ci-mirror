@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// Nivli's canvas and surfaces, compiled into the app and the widgets alike: the night
+/// Nivli's canvas and surfaces, used by every screen: the night
 /// navy with a soft glow behind what matters, or its daylight twin when the person chose
 /// Light; rows and cards a shade lighter than the canvas. No system grey and no pure
 /// black anywhere in the app — every screen sits on this.

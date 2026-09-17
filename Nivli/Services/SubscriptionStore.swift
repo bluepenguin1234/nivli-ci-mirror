@@ -25,6 +25,9 @@ final class SubscriptionStore {
     private(set) var isSubscribed: Bool = false
     /// When access runs out. `.distantFuture` for the lifetime purchase, `nil` for nobody.
     private(set) var validUntil: Date?
+    /// Whether the App Store will charge again at `validUntil`. `false` for a cancelled
+    /// subscription that still has days left, and for the lifetime purchase.
+    private(set) var willAutoRenew: Bool = false
     private(set) var isLoadingProducts: Bool = false
     private(set) var isPurchasing: Bool = false
     /// Set when the App Store could not be reached; the paywall shows it with a retry.
@@ -103,9 +106,22 @@ final class SubscriptionStore {
         let until = SubscriptionStore.validUntil(entitlements: snapshots)
         validUntil = until
         isSubscribed = until.map { $0 > Date() } ?? false
+        willAutoRenew = await autoRenewal()
         sharedStore.update { $0.entitlementValidUntil = until }
         onEntitlementChange?(until)
-        logger.log("Entitlements refreshed: \(snapshots.count) verified, subscribed=\(self.isSubscribed)")
+        logger.log("Entitlements refreshed: \(snapshots.count, privacy: .private) verified, subscribed=\(self.isSubscribed, privacy: .private)")
+    }
+
+    /// Whether the App Store intends to renew. Settings says "renews" only when this is
+    /// true, so somebody who has already cancelled is never told they will be charged again.
+    private func autoRenewal() async -> Bool {
+        guard let subscription = monthlyProduct?.subscription else { return false }
+        guard let statuses = try? await subscription.status else { return false }
+        let current = statuses.first { $0.state == .subscribed } ?? statuses.first
+        guard let status = current, case .verified(let info) = status.renewalInfo else {
+            return false
+        }
+        return info.willAutoRenew
     }
 
     // MARK: - Buying

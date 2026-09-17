@@ -11,7 +11,7 @@ struct RemindersPage: View {
         VStack(alignment: .leading, spacing: Theme.stackSpacing) {
             PageHeading(
                 title: "Stay on track",
-                subtitle: "One nudge in the evening, and only on the days you have not moved yet."
+                subtitle: "One nudge in the evening, only on days you have not moved yet."
             )
 
             SurfaceCard {
@@ -25,7 +25,7 @@ struct RemindersPage: View {
 
                     Divider().overlay(Color.nivliLine)
 
-                    Text("Nothing else. Nivli does not send streak warnings or marketing.")
+                    Text("Plus a note when Apple Health unlocks your apps for you. Nothing else, ever: no streak warnings, no marketing.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

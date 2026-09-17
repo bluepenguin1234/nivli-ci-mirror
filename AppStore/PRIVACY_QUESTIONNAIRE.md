@@ -126,8 +126,9 @@ disclosing data collected by Apple.
 JSON blob in shared `UserDefaults`: the selection tokens, the workout log, the streak and the
 settings. On the device, in the app's own container. Not a collection.
 
-**Backups**: that container is part of the user's normal iPhone backup, under their own Apple
-Account. That is the user's backup, not a transfer to the developer.
+**Backups**: the state file is excluded from iCloud Backup and computer backups (it can hold
+workouts read from Apple Health, which Apple's HealthKit terms keep out of iCloud). Nothing is
+transferred anywhere.
 
 ## Privacy manifest (for the developer, not App Store Connect)
 

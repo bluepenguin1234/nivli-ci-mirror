@@ -105,11 +105,14 @@ struct SettingsView: View {
         }
     }
 
+    /// "renews" is a promise, so it is only made when StoreKit says auto-renewal is on. A
+    /// cancelled subscription still has days left, and is told exactly that.
     private var subscriptionStatus: String {
         guard model.isSubscribed else { return "Not active" }
         guard let validUntil = model.subscriptions.validUntil else { return "Active" }
         if validUntil == .distantFuture { return "Lifetime" }
-        return "Active · renews \(validUntil.formatted(date: .abbreviated, time: .omitted))"
+        let date = validUntil.formatted(date: .abbreviated, time: .omitted)
+        return model.subscriptions.willAutoRenew ? "Active · renews \(date)" : "Active until \(date)"
     }
 
     private func restore() {
@@ -161,6 +164,8 @@ struct SettingsView: View {
             } message: {
                 Text("This removes every lock, forgets your streak and takes you back to the first screen.")
             }
+        } header: {
+            Text("Reset")
         } footer: {
             Text("Nivli keeps everything on this iPhone. There is no account and nothing is sent anywhere.")
         }

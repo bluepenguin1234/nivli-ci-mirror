@@ -71,34 +71,32 @@ struct AppsThatWaitSection: View {
     }
 }
 
-/// Health is one way: Nivli can ask for it, but only iOS can take it back.
+/// The Apple Health switch. On asks iOS for the read; off stops the observer and background
+/// delivery here and now. The switch says what Nivli does, not what iOS allowed — iOS never
+/// tells an app whether a read was granted, so nothing on this screen may claim it was.
 struct AppleHealthSection: View {
     @Environment(AppModel.self) private var model
-
-    @State private var isConnecting = false
 
     var body: some View {
         Section {
             if model.health.isAvailable {
-                if model.state.healthEnabled {
-                    HStack {
-                        Text("Connected")
-                        Spacer(minLength: 8)
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(Color.accentColor)
-                    }
+                Toggle("Apple Health", isOn: healthEnabled)
                     .nivliRow()
-                } else {
-                    Button("Connect Apple Health") { connect() }
-                        .disabled(isConnecting)
-                        .nivliRow()
-                }
             }
         } header: {
             Text("Apple Health")
         } footer: {
             Text(footnote)
         }
+    }
+
+    private var healthEnabled: Binding<Bool> {
+        Binding(
+            get: { model.state.healthEnabled },
+            set: { isOn in
+                Task { await model.setHealthEnabled(isOn) }
+            }
+        )
     }
 
     private var footnote: String {
@@ -108,15 +106,7 @@ struct AppleHealthSection: View {
         guard model.state.healthEnabled else {
             return "A workout from your Watch, or any app that writes to Health, unlocks your apps on its own."
         }
-        return "To disconnect, open Health, then Sharing, then Apps, then Nivli."
-    }
-
-    private func connect() {
-        isConnecting = true
-        Task {
-            _ = await model.connectHealth()
-            isConnecting = false
-        }
+        return "Nivli reads workouts only. If a workout does not show up, check Health › Sharing › Apps › Nivli has Workouts switched on."
     }
 }
 

@@ -9,7 +9,11 @@ struct StatusHero: View {
 
     @State private var progress: CGFloat = 0
 
-    private static let diameter: CGFloat = 200
+    /// The ring and its symbol grow with the person's text size; the stroke stays put so a
+    /// large ring does not turn into a solid disc.
+    @ScaledMetric(relativeTo: .largeTitle) private var diameter: CGFloat = 200
+    @ScaledMetric(relativeTo: .largeTitle) private var symbolSize: CGFloat = 62
+
     private static let lineWidth: CGFloat = 14
 
     var body: some View {
@@ -46,10 +50,10 @@ struct StatusHero: View {
                 )
                 .rotationEffect(.degrees(-90))
             Image(systemName: symbolName)
-                .font(.system(size: 62, weight: .semibold))
+                .font(.system(size: symbolSize, weight: .semibold))
                 .foregroundStyle(isWon ? Color.accentColor : Color.secondary)
         }
-        .frame(width: Self.diameter, height: Self.diameter)
+        .frame(width: diameter, height: diameter)
     }
 
     // MARK: - Copy
