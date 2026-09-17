@@ -7,13 +7,13 @@ import UIKit
 /// extension stops seeing the app's state, or the shield store stops matching the one the
 /// app writes to. Nothing else in `Shared` hardcodes these strings.
 enum SharedConstants {
-    /// The App Group whose `UserDefaults` carries `NivliState` between the app, the
+    /// The App Group whose container carries the `NivliState` file between the app, the
     /// DeviceActivity monitor and the shield configuration extension.
     static let appGroupID = "group.com.bluepenguin.nivli"
 
-    /// The single defaults key the encoded `NivliState` lives under. Versioned so a future
-    /// breaking shape can migrate instead of failing to decode.
-    static let stateKey = "nivli.state.v1"
+    /// The file the encoded `NivliState` lives in, inside the App Group container. Versioned
+    /// so a future breaking shape can migrate instead of failing to decode.
+    static let stateFileName = "nivli-state-v1.json"
 
     /// The name of the `ManagedSettingsStore` that carries Nivli's shields. Using a named
     /// store (rather than the unnamed one) keeps Nivli's settings separate from anything

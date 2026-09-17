@@ -171,6 +171,11 @@ says so in its own line.
 
 Buying or restoring finishes onboarding, turns the shields on and goes to Home.
 
+Someone who already has a valid subscription never sees a price here. If StoreKit has
+already found an entitlement when the paywall appears, or finds one while it is on screen,
+the screen finishes on its own and goes straight to Home. That covers a reinstall and anyone
+holding an old Nivli+ yearly or lifetime purchase.
+
 ### Home
 
 **The ring** at the top, with a word under it. It has five states.

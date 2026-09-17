@@ -14,6 +14,7 @@ workout today, by hand or straight from Apple Health. Every day you move, the st
 | [Docs/HANDOFF.md](Docs/HANDOFF.md) | **Start here.** Everything the owner has to do, in order, to ship 3.0 |
 | [Docs/PRODUCT.md](Docs/PRODUCT.md) | What the app is, every screen, how locking and streaks work, in plain language |
 | [Docs/ARCHITECTURE.md](Docs/ARCHITECTURE.md) | How the code is organised and how data flows between the app and its extensions |
+| [Docs/DECISIONS.md](Docs/DECISIONS.md) | Why it is built this way, and what each decision costs |
 | [Docs/CODEMAGIC.md](Docs/CODEMAGIC.md) | Build, test, sign and upload to TestFlight without a Mac |
 | [Docs/RELEASE_CHECKLIST.md](Docs/RELEASE_CHECKLIST.md) | Every step from here to "Submit for Review" |
 | [Docs/DEVICE_TEST.md](Docs/DEVICE_TEST.md) | What to try on a real iPhone before submitting |

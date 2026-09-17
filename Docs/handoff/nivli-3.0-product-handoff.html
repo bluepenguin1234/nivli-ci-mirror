@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nivli 3.0 Handoff</title>
+<style>
+:root{
+  --ink:#142B39;
+  --mint:#5EDCC0;
+  --teal:#11665D;
+  --canvas:#F7F9FA;
+  --surface:#FFFFFF;
+  --raised:#F0F4F6;
+  --line:#DCE4E8;
+  --text:#1F3442;
+  --muted:#5B6E7A;
+  --accent:var(--teal);
+  --accent-soft:rgba(17,102,93,.10);
+  --shadow:0 1px 2px rgba(20,43,57,.05);
+
+  /* The phone mocks keep their own palette. The app is dark by default,
+     so the mocks look the same whichever theme this page is in. */
+  --p-canvas:#08131C;
+  --p-surface:#10202B;
+  --p-raised:#162B3B;
+  --p-line:rgba(255,255,255,.12);
+  --p-text:#EAF0F2;
+  --p-muted:#93A8B3;
+  --p-mint:#5EDCC0;
+  --p-ink:#142B39;
+
+  --sys:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+
+  --gutter:16px;
+  --radius:18px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --canvas:#08131C;
+    --surface:#10202B;
+    --raised:#162B3B;
+    --line:rgba(255,255,255,.08);
+    --text:#EAF0F2;
+    --muted:#9BB0BA;
+    --accent:#5EDCC0;
+    --accent-soft:rgba(94,220,192,.12);
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --canvas:#08131C;
+  --surface:#10202B;
+  --raised:#162B3B;
+  --line:rgba(255,255,255,.08);
+  --text:#EAF0F2;
+  --muted:#9BB0BA;
+  --accent:#5EDCC0;
+  --accent-soft:rgba(94,220,192,.12);
+  --shadow:none;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--canvas);
+  color:var(--text);
+  font:16px/1.6 var(--sys);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:0 var(--gutter)}
+
+/* ---------- sticky mini table of contents ---------- */
+.toc{
+  position:sticky;top:0;z-index:40;
+  background:var(--canvas);
+  border-bottom:1px solid var(--line);
+}
+.toc-inner{
+  max-width:1040px;margin:0 auto;padding:10px var(--gutter);
+  display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;
+}
+.toc a{
+  color:var(--muted);text-decoration:none;
+  font-size:13px;letter-spacing:.01em;white-space:nowrap;
+  padding:3px 0;border-bottom:1px solid transparent;
+}
+.toc a:hover,.toc a:focus-visible{color:var(--accent);border-bottom-color:var(--accent);outline:none}
+.toc .toc-brand{
+  font-weight:700;color:var(--text);font-size:13px;letter-spacing:.02em;
+  padding-right:6px;margin-right:2px;border-right:1px solid var(--line);
+}
+@media (max-width:720px){
+  .toc{position:static}
+  .toc-inner{gap:6px 14px}
+}
+
+/* ---------- header ---------- */
+header.page{padding:64px 0 8px}
+.brandline{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+.brandline .icon{width:56px;height:56px;flex:0 0 auto;border-radius:14px;display:block}
+.brandline .who{font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+h1{
+  font-size:clamp(38px,6.4vw,66px);line-height:1.02;letter-spacing:-.03em;
+  font-weight:800;margin:0;
+}
+.tagline{
+  font-size:clamp(20px,2.6vw,28px);line-height:1.2;letter-spacing:-.015em;
+  color:var(--accent);font-weight:600;margin:14px 0 0;
+}
+.meta{
+  margin-top:26px;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;
+}
+.pill{
+  font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:999px;
+  background:var(--accent-soft);color:var(--accent);
+}
+.pill.flat{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.summary{
+  margin:34px 0 0;max-width:68ch;font-size:19px;line-height:1.5;color:var(--text);
+  border-left:2px solid var(--accent);padding-left:20px;
+}
+.summary p{margin:0 0 10px}
+.summary p:last-child{margin-bottom:0}
+
+/* ---------- sections ---------- */
+section{padding:72px 0 0;scroll-margin-top:64px}
+h2{
+  font-size:clamp(26px,3.4vw,36px);line-height:1.12;letter-spacing:-.022em;
+  font-weight:700;margin:0;padding-top:26px;border-top:1px solid var(--line);
+}
+.lede{color:var(--muted);margin:10px 0 0;max-width:70ch;font-size:17px}
+h3{font-size:19px;line-height:1.3;letter-spacing:-.012em;font-weight:700;margin:36px 0 0}
+h4{font-size:14px;font-weight:700;margin:0 0 6px;letter-spacing:.02em}
+
+/* ---------- plain lists ---------- */
+ul.plain{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:14px;max-width:80ch}
+ul.plain li{position:relative;padding-left:26px;color:var(--text)}
+ul.plain li::before{
+  content:"";position:absolute;left:0;top:11px;
+  width:8px;height:8px;border-radius:2px;background:var(--accent);
+}
+ul.plain li b{font-weight:700}
+ul.sub{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:5px}
+ul.sub li{color:var(--muted);font-size:14.5px;padding-left:14px;position:relative}
+ul.sub li::before{content:"";position:absolute;left:0;top:10px;width:5px;height:1.5px;background:var(--muted);opacity:.6}
+
+/* ---------- day timeline ---------- */
+.timeline{
+  margin-top:34px;display:grid;gap:0;
+  grid-template-columns:repeat(5,1fr);
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--surface);overflow:hidden;box-shadow:var(--shadow);
+}
+.step{padding:26px 22px 28px;border-left:1px solid var(--line)}
+.step:first-child{border-left:0}
+.step .n{
+  font:800 46px/1 var(--sys);letter-spacing:-.04em;
+  color:var(--accent);display:block;margin-bottom:12px;
+}
+.step h3{margin:0 0 6px;font-size:16px;letter-spacing:-.005em}
+.step p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
+@media (max-width:720px){
+  .timeline{grid-template-columns:1fr}
+  .step{border-left:0;border-top:1px solid var(--line);padding:20px 18px}
+  .step:first-child{border-top:0}
+  .step .n{font-size:34px;margin-bottom:6px}
+}
+
+/* ---------- screen cards ---------- */
+.screens{display:grid;gap:18px;margin-top:34px}
+.screen{
+  display:grid;grid-template-columns:260px 1fr;gap:34px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px;box-shadow:var(--shadow);align-items:start;
+}
+.screen > .copy{min-width:0}
+.screen .kicker{
+  font:600 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:8px;
+}
+.screen h3{margin:0 0 4px;font-size:22px;letter-spacing:-.018em}
+.screen .what{margin:12px 0 0;color:var(--text);font-size:15.5px}
+.screen h4{margin-top:20px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-size:11.5px}
+.screen .btns{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.screen .btns li{
+  font-size:14.5px;color:var(--muted);
+  display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline;
+}
+.screen .btns .b{
+  font-weight:700;color:var(--text);white-space:nowrap;
+  background:var(--raised);border:1px solid var(--line);border-radius:7px;
+  padding:1px 7px;font-size:13px;
+}
+.note{
+  margin-top:16px;font-size:14px;color:var(--muted);
+  border-left:2px solid var(--line);padding-left:14px;
+}
+@media (max-width:720px){
+  .screen{grid-template-columns:1fr;gap:22px;padding:18px}
+  .phone{margin:0 auto}
+}
+
+/* ---------- the phone mock ---------- */
+.phone{
+  width:260px;flex:0 0 260px;
+  background:var(--p-canvas);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:34px;
+  padding:10px 9px 14px;
+  color:var(--p-text);
+  font-size:11px;line-height:1.4;
+  box-shadow:0 10px 30px rgba(8,19,28,.22);
+}
+.phone .bar{
+  height:5px;width:74px;margin:2px auto 10px;border-radius:99px;
+  background:rgba(255,255,255,.22);
+}
+.scr{padding:0 12px 4px;min-height:400px;display:flex;flex-direction:column}
+.scr.tight{min-height:340px}
+.p-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;min-height:18px}
+.p-nav .gear{width:14px;height:14px;color:var(--p-muted)}
+.p-back{color:var(--p-muted);font-size:13px;line-height:1}
+.p-prog{height:3px;border-radius:99px;background:rgba(255,255,255,.12);flex:1;margin-left:10px;overflow:hidden}
+.p-prog i{display:block;height:100%;background:var(--p-mint);border-radius:99px}
+.p-h1{font-size:19px;line-height:1.14;font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+.p-h2{font-size:14.5px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px}
+.p-sub{color:var(--p-muted);font-size:11px;margin:0 0 12px}
+.p-body{color:var(--p-muted);font-size:11px;margin:0 0 8px}
+.p-strong{font-size:11.5px;font-weight:700;margin:0 0 8px}
+.p-row{
+  border:1px solid var(--p-line);border-radius:11px;padding:9px 11px;margin-bottom:7px;
+  background:var(--p-surface);display:flex;align-items:center;gap:8px;
+}
+.p-row.on{border-color:var(--p-mint);background:rgba(94,220,192,.11)}
+.p-row .tick{
+  width:14px;height:14px;border-radius:50%;border:1px solid var(--p-line);flex:0 0 auto;
+}
+.p-row.on .tick{background:var(--p-mint);border-color:var(--p-mint)}
+.p-card{
+  border:1px solid var(--p-line);border-radius:14px;padding:12px;
+  background:var(--p-surface);margin-bottom:10px;
+}
+.p-card.raised{background:var(--p-raised)}
+.p-btn{
+  display:block;text-align:center;background:var(--p-mint);color:var(--p-ink);
+  font-weight:800;font-size:12px;border-radius:12px;padding:11px 10px;margin-top:auto;
+}
+.p-btn.quiet{
+  background:transparent;color:var(--p-mint);border:1px solid rgba(94,220,192,.45);
+}
+.p-btn.inline{margin-top:10px;padding:9px 10px;font-size:11.5px}
+.p-link{text-align:center;color:var(--p-muted);font-size:11px;margin-top:9px}
+.p-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(94,220,192,.14);color:var(--p-mint);
+  border-radius:99px;padding:4px 9px;font-size:10.5px;font-weight:700;
+}
+.p-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--p-mint)}
+.p-seg{display:flex;border:1px solid var(--p-line);border-radius:9px;overflow:hidden;background:var(--p-surface)}
+.p-seg span{flex:1;text-align:center;padding:6px 0;font-size:10.5px;color:var(--p-muted)}
+.p-seg span.on{background:var(--p-mint);color:var(--p-ink);font-weight:800}
+.p-spacer{flex:1}
+.p-hr{height:1px;background:var(--p-line);margin:9px 0}
+
+/* ring */
+.p-ring{
+  width:120px;height:120px;border-radius:50%;margin:8px auto 14px;
+  border:11px solid rgba(255,255,255,.12);
+  display:grid;place-items:center;color:var(--p-muted);
+}
+.p-ring.won{border-color:var(--p-mint);color:var(--p-mint)}
+.p-ring svg{width:40px;height:40px}
+.p-center{text-align:center}
+.p-status{font-size:15px;font-weight:800;letter-spacing:-.015em;margin:0 0 3px;text-align:center}
+.p-detail{font-size:11px;color:var(--p-muted);text-align:center;margin:0 0 14px}
+
+/* streak block */
+.p-streak{display:flex;align-items:flex-end;gap:9px}
+.p-streak .flame{width:20px;height:20px;color:var(--p-mint);margin-bottom:5px}
+.p-streak .big{font-size:36px;font-weight:800;line-height:.95;letter-spacing:-.03em}
+.p-streak .lbl{font-size:10.5px;color:var(--p-muted)}
+.p-streak .long{margin-left:auto;text-align:right;font-size:10.5px;color:var(--p-muted)}
+.p-streak .long b{display:block;font-size:14px;color:var(--p-text)}
+.p-dots{display:flex;justify-content:space-between;margin-top:12px}
+.p-dots i{
+  width:17px;height:17px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.10);
+}
+.p-dots i.done{background:var(--p-mint)}
+.p-dots i.done svg{width:9px;height:9px;color:var(--p-ink)}
+.p-dots i.today{background:transparent;border:2px solid var(--p-mint)}
+.p-dots i.rest{background:transparent;border:1px solid var(--p-line)}
+.p-dots i.rest svg{width:9px;height:9px;color:var(--p-muted)}
+
+/* app rows */
+.p-app{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px}
+.p-app .sq{width:16px;height:16px;border-radius:5px;background:rgba(255,255,255,.16);flex:0 0 auto}
+
+/* kind grid */
+.p-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.p-tile{
+  border:1px solid var(--p-line);border-radius:9px;background:var(--p-surface);
+  padding:9px 2px;text-align:center;font-size:9.5px;color:var(--p-muted);
+}
+.p-tile.on{border-color:var(--p-mint);background:rgba(94,220,192,.12);color:var(--p-text);font-weight:700}
+.p-chips{display:flex;gap:5px;flex-wrap:wrap}
+.p-mini{
+  border-radius:99px;padding:5px 9px;font-size:10px;font-weight:700;
+  background:rgba(94,220,192,.14);color:var(--p-mint);
+}
+.p-mini.on{background:var(--p-mint);color:var(--p-ink)}
+
+/* settings list */
+.p-sec{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--p-muted);margin:12px 0 5px}
+.p-sec:first-child{margin-top:0}
+.p-list{border:1px solid var(--p-line);border-radius:11px;overflow:hidden;background:var(--p-surface)}
+.p-item{padding:8px 11px;font-size:11px;border-top:1px solid var(--p-line);display:flex;justify-content:space-between;gap:8px}
+.p-item:first-child{border-top:0}
+.p-item .v{color:var(--p-muted)}
+.p-item.red{color:#FF8A80}
+.p-foot{font-size:9.5px;color:var(--p-muted);margin-top:6px;line-height:1.45}
+
+/* shield + notifications */
+.p-shield{
+  min-height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:26px 16px;background:var(--p-ink);border-radius:26px;margin:0 2px;
+}
+.p-shield .mark{width:56px;height:56px;margin-bottom:20px}
+.p-shield .t{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0 0 10px}
+.p-shield .s{font-size:11.5px;color:rgba(255,255,255,.8);margin:0 0 4px;line-height:1.45}
+.p-shield .ok{
+  margin-top:26px;background:var(--p-mint);color:var(--p-ink);
+  font-weight:800;font-size:12px;border-radius:11px;padding:10px 40px;
+}
+.p-notif{
+  background:rgba(255,255,255,.10);border:1px solid var(--p-line);
+  border-radius:15px;padding:11px 12px;margin-bottom:10px;
+  display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;
+}
+.p-notif .ic{width:24px;height:24px;border-radius:6px;background:var(--p-ink);display:grid;place-items:center}
+.p-notif .ic svg{width:18px;height:18px}
+.p-notif .t{font-size:11.5px;font-weight:700;margin:0}
+.p-notif .b{font-size:11px;color:var(--p-muted);margin:2px 0 0}
+
+/* ---------- tables ---------- */
+.tbl{
+  margin-top:26px;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--surface);overflow:hidden;box-shadow:var(--shadow);
+}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:14px 20px;border-top:1px solid var(--line)}
+thead th{
+  border-top:0;font:600 11px/1.3 var(--mono);letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);background:var(--raised);
+}
+tbody td:first-child{color:var(--text);font-weight:700;width:30%}
+tbody td{color:var(--muted)}
+table.map tbody td:first-child{font-family:var(--mono);font-size:13.5px;font-weight:600;white-space:nowrap}
+@media (max-width:720px){
+  th,td{padding:12px 14px;font-size:14px}
+  tbody td:first-child{width:auto}
+}
+
+/* ---------- checklists ---------- */
+ol.todo{list-style:none;margin:30px 0 0;padding:0;counter-reset:t;display:grid;gap:12px;max-width:84ch}
+ol.todo > li{
+  counter-increment:t;
+  display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:16px 18px;box-shadow:var(--shadow);
+}
+ol.todo > li::before{
+  content:counter(t);
+  width:28px;height:28px;border-radius:50%;
+  background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;font-weight:800;font-size:14px;
+}
+ol.todo .hd{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:baseline}
+ol.todo b{font-size:16px;font-weight:700;color:var(--text)}
+ol.todo .time{
+  font-size:12px;font-weight:700;color:var(--muted);
+  border:1px solid var(--line);border-radius:99px;padding:2px 9px;white-space:nowrap;
+}
+ol.todo p{margin:6px 0 0;color:var(--muted);font-size:14.5px}
+ol.todo li.long{border-color:var(--accent);background:var(--accent-soft)}
+ol.todo li.long .time{border-color:var(--accent);color:var(--accent)}
+.flag{
+  display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--accent);
+}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:28px}
+@media (max-width:720px){.cols{grid-template-columns:1fr;gap:20px}}
+.panel{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 24px;box-shadow:var(--shadow);
+}
+.panel h3{margin:0 0 4px;font-size:17px}
+.panel .tag{font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.panel ul{margin:12px 0 0;padding-left:18px;color:var(--muted);font-size:14.5px}
+.panel li{margin:6px 0}
+.panel.good .tag{color:var(--accent)}
+
+.worked{
+  margin-top:20px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);
+}
+.worked h3{margin:0 0 10px;font-size:17px}
+.days{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 12px}
+.day{
+  min-width:62px;flex:1 1 62px;border:1px solid var(--line);border-radius:10px;
+  padding:8px 4px;text-align:center;font-size:11px;color:var(--muted);background:var(--raised);
+}
+.day b{display:block;font-size:12px;color:var(--text);margin-bottom:3px}
+.day.done{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.day.done b{color:var(--accent)}
+.day.rest{border-style:dashed}
+.day.miss{opacity:.55}
+.worked p{margin:8px 0 0;color:var(--muted);font-size:14.5px}
+
+footer.page{
+  margin-top:80px;padding:26px 0 70px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:13.5px;
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+@media print{
+  .toc{display:none}
+  body{background:#fff;color:#000}
+  .screen,.panel,.tbl,.worked,ol.todo > li,.timeline{box-shadow:none;break-inside:avoid}
+  section{break-before:auto;padding-top:34px}
+  h2{page-break-after:avoid}
+  .phone{box-shadow:none}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="ni-icon" viewBox="0 0 1024 1024">
+    <rect width="1024" height="1024" rx="232" fill="#142B39"/>
+    <path d="M302 704V312L718 704V432" fill="none" stroke="#FFFFFF" stroke-width="92"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="718" cy="312" r="50" fill="#5EDCC0"/>
+  </symbol>
+  <symbol id="ni-mark" viewBox="256 218 556 532">
+    <path d="M302 704V312L718 704V432" fill="none" stroke="#FFFFFF" stroke-width="92"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="718" cy="312" r="50" fill="#5EDCC0"/>
+  </symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24">
+    <path d="M7.5 10.5V7.2a4.5 4.5 0 0 1 9 0v3.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    <rect x="4.2" y="10.2" width="15.6" height="11" rx="3" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24">
+    <path d="M4.5 12.8l5 5.2L19.5 6.4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24">
+    <path d="M20.5 3.5C9.5 3.5 4 9 4 15.5c0 2 .6 3.6.6 3.6S8 8.6 19 6.4c0 0-8.4 3.4-11.6 12.7 3.6 1.4 13.1.4 13.1-15.6z" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24">
+    <path d="M12.6 2c.4 3.6 3.9 5.2 4.9 8.4 1.4 4.4-1.6 9.1-5.8 9.1S4.4 15.6 5.5 11.9c.5-1.7 1.6-2.6 2.4-3.6.2 1.7.9 2.8 2 3.2.3-4.3 1.2-7.1 2.7-9.5z" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24">
+    <path d="M12 20.8S3.4 15.5 3.4 9.6a4.8 4.8 0 0 1 8.6-2.9 4.8 4.8 0 0 1 8.6 2.9c0 5.9-8.6 11.2-8.6 11.2z" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="3.4" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.2 2.2M16.9 16.9l2.2 2.2M19.1 4.9l-2.2 2.2M7.1 16.9l-2.2 2.2"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<nav class="toc" aria-label="Contents">
+  <div class="toc-inner">
+    <span class="toc-brand">Nivli 3.0</span>
+    <a href="#what">What it does</a>
+    <a href="#day">A day</a>
+    <a href="#screens">Every screen</a>
+    <a href="#rules">The rules</a>
+    <a href="#business">Business</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#verified">Verified</a>
+    <a href="#you">What you do</a>
+    <a href="#decisions">Decisions</a>
+    <a href="#repo">Repository</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="page">
+  <div class="brandline">
+    <svg class="icon" viewBox="0 0 1024 1024" role="img" aria-label="Nivli"><use href="#ni-icon"/></svg>
+    <span class="who">Product handoff</span>
+  </div>
+  <h1>Nivli 3.0</h1>
+  <p class="tagline">Move first. Then scroll.</p>
+  <div class="meta">
+    <span class="pill">16 September 2026</span>
+    <span class="pill flat">Version 3.0.0</span>
+    <span class="pill flat">iPhone, iOS 18 and later</span>
+    <span class="pill flat">$2.99 a month</span>
+  </div>
+  <div class="summary">
+    <p>Nivli 3.0 is a new product in the same App Store listing. It locks the apps you choose until you have worked out today, then opens them until midnight.</p>
+    <p>Everything is built: eight onboarding pages, the paywall, Home, the log sheet, Settings, the lock screen iOS draws over a blocked app, and the piece that re-locks everything at midnight.</p>
+    <p>The code is written, reviewed and pushed. It has not been compiled on a Mac yet, because this machine cannot run one. That first compile is step one of your list.</p>
+  </div>
+</header>
+
+<section id="what">
+  <h2>What Nivli does</h2>
+  <p class="lede">Five sentences cover the whole product.</p>
+  <ul class="plain">
+    <li><b>You pick the apps that wait.</b> Single apps, whole categories, or websites, chosen in Apple's own picker. iOS holds them shut for you.</li>
+    <li><b>A workout opens them.</b> Log one by hand in two taps, or connect Apple Health and let a run, a lift or a class do it without you opening Nivli.</li>
+    <li><b>You set what counts.</b> Any workout at or over your minimum unlocks the day. The minimum starts at 20 minutes and can be 10 to 60.</li>
+    <li><b>At midnight it all locks again</b> and the streak carries on. Seven dots on Home show the week behind you, and your longest run is kept.</li>
+    <li><b>Rest days are yours.</b> Pick weekdays you always rest, or take today off in one tap. Nothing is locked and the streak is not broken.</li>
+  </ul>
+</section>
+
+<section id="day">
+  <h2>How a day works</h2>
+  <p class="lede">The same five beats, every day, whether or not the app is ever opened.</p>
+  <div class="timeline">
+    <div class="step">
+      <span class="n">1</span>
+      <h3>Midnight</h3>
+      <p>A small background piece of Nivli puts the shields back on the apps you chose. Nothing is tapped and nothing is shown.</p>
+    </div>
+    <div class="step">
+      <span class="n">2</span>
+      <h3>You open a blocked app</h3>
+      <p>iOS shows the Nivli shield instead of the app. Dark, the mark, and two words: Move first.</p>
+    </div>
+    <div class="step">
+      <span class="n">3</span>
+      <h3>You work out</h3>
+      <p>Any kind, anywhere. It only has to be as long as your minimum, which is 20 minutes unless you change it.</p>
+    </div>
+    <div class="step">
+      <span class="n">4</span>
+      <h3>Log it, or Health tells Nivli</h3>
+      <p>Two taps in the app. Or an Apple Watch run reports itself and the apps open while the phone is still in your pocket.</p>
+    </div>
+    <div class="step">
+      <span class="n">5</span>
+      <h3>Open until midnight</h3>
+      <p>The ring fills, the streak goes up one, and the apps stay open for the rest of the day.</p>
+    </div>
+  </div>
+</section>
+
+<section id="screens">
+  <h2>Every screen</h2>
+  <p class="lede">Every screen in the app, drawn here from the code that builds it. The words in the mocks are the words the app shows.</p>
+
+  <div class="screens">
+
+    <!-- 1 Welcome -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span></span></div>
+          <svg viewBox="256 218 556 532" style="width:74px;height:70px;display:block;margin:26px auto 30px"><use href="#ni-mark"/></svg>
+          <p class="p-h1">Move first.<br>Then scroll.</p>
+          <p class="p-body" style="font-size:12px">Nivli keeps the apps you choose locked until you have worked out today.</p>
+          <p class="p-body" style="font-size:12px">Log it in two taps, or let Apple Health prove it for you.</p>
+          <div class="p-spacer"></div>
+          <span class="p-btn">Get started</span>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Onboarding 1 of 8</span>
+        <h3>Welcome</h3>
+        <p class="what">The mark sits on the dark canvas and breathes slowly, about one cycle every two and a half seconds. Under it the headline "Move first. Then scroll." and two quiet lines saying what the app is. The first screen asks for nothing, so the first tap costs nothing.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Get started</span><span>Goes to page 2. It is the only control on the screen.</span></li>
+        </ul>
+        <p class="note">The breathing never starts for anyone who has Reduce Motion turned on in iOS. That is true of every animation in the app.</p>
+      </div>
+    </article>
+
+    <!-- 2 Goals -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span class="p-back">&#8249;</span><span class="p-prog"><i style="width:25%"></i></span></div>
+          <p class="p-h1">What are you here for?</p>
+          <p class="p-sub">Pick as many as you like.</p>
+          <div class="p-row on"><span class="tick"></span>Build a workout habit</div>
+          <div class="p-row on"><span class="tick"></span>Cut my screen time</div>
+          <div class="p-row"><span class="tick"></span>Get stronger</div>
+          <div class="p-row"><span class="tick"></span>Feel better day to day</div>
+          <div class="p-row"><span class="tick"></span>Sleep better</div>
+          <div class="p-spacer"></div>
+          <span class="p-btn">Continue</span>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Onboarding 2 of 8</span>
+        <h3>What are you here for</h3>
+        <p class="what">Five reasons, any number of them. Tapping one turns the row mint. A progress bar and a back arrow appear from this page on, so nothing is a one way door.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Any row</span><span>Selects or deselects it. The order you tap them is kept.</span></li>
+          <li><span class="b">Continue</span><span>Greyed out until at least one is picked.</span></li>
+          <li><span class="b">Back</span><span>Returns to the page before. Answers are already saved.</span></li>
+        </ul>
+        <p class="note">These answers are kept for wording only. Nothing on this page changes what Nivli does.</p>
+      </div>
+    </article>
+
+    <!-- 3 Frequency -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span class="p-back">&#8249;</span><span class="p-prog"><i style="width:37%"></i></span></div>
+          <p class="p-h1">How often do you move now?</p>
+          <p class="p-sub">There is no wrong answer. Nivli starts where you are.</p>
+          <div class="p-row"><span class="tick"></span>Rarely</div>
+          <div class="p-row on"><span class="tick"></span>1&#8211;2 days a week</div>
+          <div class="p-row"><span class="tick"></span>3&#8211;4 days a week</div>
+          <div class="p-row"><span class="tick"></span>Almost every day</div>
+          <div class="p-spacer"></div>
+          <span class="p-btn">Continue</span>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Onboarding 3 of 8</span>
+        <h3>How often do you move</h3>
+        <p class="what">One answer out of four. The subtitle does the work here: "There is no wrong answer. Nivli starts where you are." The app never uses this number to judge or to set a target.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Any row</span><span>Picks it and deselects the others.</span></li>
+          <li><span class="b">Continue</span><span>Greyed out until one is picked.</span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- 4 Phone hours -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span class="p-back">&#8249;</span><span class="p-prog"><i style="width:50%"></i></span></div>
+          <p class="p-h1">How much of your day goes to your phone?</p>
+          <p class="p-sub">Social apps only. A rough guess is fine.</p>
+          <div class="p-row"><span class="tick"></span>About an hour</div>
+          <div class="p-row on"><span class="tick"></span>2 hours</div>
+          <div class="p-row"><span class="tick"></span>3 hours or more</div>
+          <div class="p-row"><span class="tick"></span>I&#8217;d rather not know</div>
+          <div class="p-card" style="margin-top:10px">
+            <div style="font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--p-mint)">&#8776; 30 days</div>
+            <div style="font-size:10.5px;color:var(--p-muted);margin-top:2px">of your year, on your phone</div>
+          </div>
+          <div class="p-spacer"></div>
+          <span class="p-btn">Continue</span>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Onboarding 4 of 8</span>
+        <h3>Phone hours, and the reveal</h3>
+        <p class="what">The one page that pushes back. As soon as an answer is tapped, a card slides up from below with the person's own number turned into something they can feel: a big mint "&#8776; 30 days" over the line "of your year, on your phone".</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">About an hour</span><span>Reveals &#8776; 15 days.</span></li>
+          <li><span class="b">2 hours</span><span>Reveals &#8776; 30 days.</span></li>
+          <li><span class="b">3 hours or more</span><span>Reveals &#8776; 46 days.</span></li>
+          <li><span class="b">I&#8217;d rather not know</span><span>Shows nothing at all. The card stays away and Continue still works.</span></li>
+        </ul>
+        <p class="note">The card is read out as one sentence by VoiceOver: "About 30 days of your year, on your phone."</p>
+      </div>
+    </article>
+
+    <!-- 5 Apps -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span class="p-back">&#8249;</span><span class="p-prog"><i style="width:62%"></i></span></div>
+          <p class="p-h1">Choose the apps that wait</p>
+          <p class="p-sub">Screen Time lets Nivli hold those apps shut until you have moved.</p>
+          <p class="p-body">Nivli never sees which apps you picked. iOS keeps the list and draws the names.</p>
+          <div class="p-card">
+            <div class="p-chip"><span class="dot"></span>4 apps &#183; 1 category &#183; 2 sites</div>
+            <span class="p-btn quiet inline">Change apps</span>
+          </div>
+          <div class="p-spacer"></div>
+          <span class="p-btn">Continue</span>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Onboarding 5 of 8</span>
+        <h3>Choose the apps that wait</h3>
+        <p class="what">The only permission that sounds serious, so it is explained before iOS is allowed to ask. The card in the middle shows one of three states, and none of them is a dead end.</p>
+        <h4>The three states</h4>
+        <ul class="btns">
+          <li><span class="b">Not asked yet</span><span>"iOS will ask once. Nivli only uses it on this iPhone." with an <b>Allow Screen Time</b> button that brings up Apple's prompt.</span></li>
+          <li><span class="b">Allowed</span><span>"Pick the apps, categories or sites that should wait." with <b>Choose apps</b>, which opens Apple's picker. Once something is picked, a mint chip reads "4 apps &#183; 1 category &#183; 2 sites" and the button becomes <b>Change apps</b>.</span></li>
+          <li><span class="b">Off or unavailable</span><span>"Screen Time is off. Nivli cannot lock anything without it. Carry on for now, and turn it on later in Settings." Continue is enabled anyway.</span></li>
+        </ul>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Continue</span><span>Enabled once something is chosen, or when Screen Time is off or unavailable so there is nothing to choose.</span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- 6 Health -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span class="p-back">&#8249;</span><span class="p-prog"><i style="width:75%"></i></span></div>
+          <p class="p-h1">How will Nivli know you moved?</p>
+          <p class="p-sub">Apple Health can unlock your apps on its own, even while Nivli is closed.</p>
+          <div class="p-card">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <svg style="width:14px;height:14px;color:var(--p-mint)"><use href="#i-heart"/></svg>
+              <b style="font-size:12px">Apple Health</b>
+            </div>
+            <p class="p-body" style="margin:0">Nivli reads your workouts and nothing else. A Watch run unlocks your apps before you are back indoors.</p>
+            <span class="p-btn quiet inline">Connect Apple Health</span>
+          </div>
+          <p class="p-strong">Or log it yourself in two taps.</p>
+          <div class="p-seg">
+            <span>10</span><span>15</span><span class="on">20</span><span>30</span><span>45</span><span>60</span>
+          </div>
+          <div style="font-size:9.5px;color:var(--p-muted);margin-top:5px">Minimum minutes for a workout to count</div>
+          <div class="p-spacer"></div>
+          <span class="p-btn">Continue</span>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Onboarding 6 of 8</span>
+        <h3>How will Nivli know you moved</h3>
+        <p class="what">The Health card is optional and says exactly what it reads. Under it, the fallback in one line, then the number that decides what counts for the rest of the app.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Connect Apple Health</span><span>Brings up Apple's permission sheet. On yes, the button is replaced by a mint <b>Connected</b> chip and today's workouts are pulled in straight away.</span></li>
+          <li><span class="b">10 to 60</span><span>Sets the minimum a workout has to reach to unlock the day. 20 is preselected.</span></li>
+          <li><span class="b">Continue</span><span>Always enabled. Health is genuinely optional, and the whole card is hidden on a device without Health.</span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- 7 Reminders -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span class="p-back">&#8249;</span><span class="p-prog"><i style="width:87%"></i></span></div>
+          <p class="p-h1">Stay on track</p>
+          <p class="p-sub">One nudge in the evening, and only on the days you have not moved yet.</p>
+          <div class="p-card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <b style="font-size:12px">Remind me at</b>
+              <span style="background:var(--p-raised);border-radius:7px;padding:5px 9px;font-size:11px">6:00 PM</span>
+            </div>
+            <div class="p-hr"></div>
+            <p class="p-body" style="margin:0">Nothing else. Nivli does not send streak warnings or marketing.</p>
+          </div>
+          <div class="p-spacer"></div>
+          <span class="p-btn">Turn on reminders</span>
+          <div class="p-link">Not now</div>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Onboarding 7 of 8</span>
+        <h3>Stay on track</h3>
+        <p class="what">One reminder, at a time the person picks, and a promise that there will never be a second kind. The quiet button under the main one is a real answer, not a way of asking twice.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">6:00 PM</span><span>Opens the time wheel. Any time of day works.</span></li>
+          <li><span class="b">Turn on reminders</span><span>Asks iOS for notification permission, then moves on. If the person says no to iOS, the reminder simply stays off and nothing else changes.</span></li>
+          <li><span class="b">Not now</span><span>Moves on with reminders off. Nothing is asked.</span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- 8 Summary -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span class="p-back">&#8249;</span><span class="p-prog"><i style="width:100%"></i></span></div>
+          <p class="p-h1">Your first streak starts today</p>
+          <p class="p-sub">Here is how Nivli is set up. All of it can change later in Settings.</p>
+          <div class="p-card">
+            <div class="p-item" style="padding:0 0 7px"><span class="v">Apps that wait</span><b>4 apps &#183; 1 category</b></div>
+            <div class="p-item" style="padding:7px 0"><span class="v">Counts as a workout</span><b>&#8805; 20 min</b></div>
+            <div class="p-item" style="padding:7px 0"><span class="v">Apple Health</span><b>On</b></div>
+            <div class="p-item" style="padding:7px 0 0"><span class="v">Reminder</span><b>6:00 PM</b></div>
+          </div>
+          <div class="p-dots" style="padding:6px 8px">
+            <i class="rest"></i><i class="rest"></i><i class="rest"></i><i class="rest"></i><i class="rest"></i><i class="rest"></i><i class="today"></i>
+          </div>
+          <p class="p-strong" style="margin-top:8px">Your first streak starts with today&#8217;s workout.</p>
+          <div class="p-spacer"></div>
+          <span class="p-btn">Continue</span>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Onboarding 8 of 8</span>
+        <h3>Summary</h3>
+        <p class="what">Everything chosen so far, read back in one card, then a week of dots with today lit in mint. The last thing before the paywall is a promise rather than another question.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Continue</span><span>Goes to the paywall. Nothing on this page is editable, and every row of it is changeable later in Settings.</span></li>
+        </ul>
+        <p class="note">If the person never picked any apps, the first row reads "Not chosen yet" instead of a count.</p>
+      </div>
+    </article>
+
+    <!-- 9 Paywall -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span></span></div>
+          <svg viewBox="256 218 556 532" style="width:40px;height:38px;display:block;margin:6px 0 14px"><use href="#ni-mark"/></svg>
+          <p class="p-h1">Unlock your apps by moving first</p>
+          <div style="margin:12px 0 4px">
+            <div style="display:flex;gap:9px;margin-bottom:9px">
+              <svg style="width:13px;height:13px;color:var(--p-mint);flex:0 0 auto;margin-top:2px"><use href="#i-lock"/></svg>
+              <div><b style="font-size:11.5px">The apps you chose stay shut</b><div style="color:var(--p-muted);font-size:10.5px">Until a workout says otherwise.</div></div>
+            </div>
+            <div style="display:flex;gap:9px;margin-bottom:9px">
+              <svg style="width:13px;height:13px;color:var(--p-mint);flex:0 0 auto;margin-top:2px"><use href="#i-heart"/></svg>
+              <div><b style="font-size:11.5px">Apple Health unlocks them for you</b><div style="color:var(--p-muted);font-size:10.5px">A Watch run or a gym session.</div></div>
+            </div>
+            <div style="display:flex;gap:9px">
+              <svg style="width:13px;height:13px;color:var(--p-mint);flex:0 0 auto;margin-top:2px"><use href="#i-flame"/></svg>
+              <div><b style="font-size:11.5px">Streaks that make it stick</b><div style="color:var(--p-muted);font-size:10.5px">Rest days are yours to take.</div></div>
+            </div>
+          </div>
+          <div class="p-card" style="margin-top:12px">
+            <b style="font-size:13px">Nivli</b>
+            <div style="font-size:17px;font-weight:800;color:var(--p-mint);margin:3px 0 7px">$2.99 / month</div>
+            <span class="p-chip"><span class="dot"></span>Cancel anytime</span>
+          </div>
+          <span class="p-btn">Start for $2.99/month</span>
+          <div class="p-link">Restore Purchases</div>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">The one thing Nivli sells</span>
+        <h3>Paywall</h3>
+        <p class="what">One plan on one screen, at the end of onboarding. The mark, the promise, three benefit rows, the price card, and the legal text Apple requires. The price and the period are read from the App Store at run time, never typed into the app, so a change of price in App Store Connect shows up on its own.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Start for $2.99/month</span><span>Apple's purchase sheet. On success the entitlement is written, onboarding is marked finished, the shields go on and Home appears.</span></li>
+          <li><span class="b">Restore Purchases</span><span>Brings back a subscription bought before, including an old yearly or lifetime purchase. If there is nothing, it says "Nothing to restore on this Apple Account."</span></li>
+          <li><span class="b">Terms of Use &#183; Privacy Policy</span><span>Apple's standard licence and Nivli's own policy page.</span></li>
+          <li><span class="b">Try again</span><span>Appears only if the App Store does not answer.</span></li>
+        </ul>
+        <p class="note">During onboarding there is no way past this screen except buying or restoring. Reopened later from Home or Settings it gets a close button in the corner. Someone who already pays never sees a price at all: an old Nivli+ subscriber, or anyone reinstalling, is recognised at launch and walked straight through to Home.</p>
+      </div>
+    </article>
+
+    <!-- 10 Home locked -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav">
+            <span></span>
+            <svg viewBox="256 218 556 532" style="width:22px;height:21px"><use href="#ni-mark"/></svg>
+            <svg class="gear"><use href="#i-gear"/></svg>
+          </div>
+          <div class="p-ring"><svg><use href="#i-lock"/></svg></div>
+          <p class="p-status">Locked until you move</p>
+          <p class="p-detail">3 apps are waiting</p>
+          <div class="p-card">
+            <div class="p-streak">
+              <svg class="flame"><use href="#i-flame"/></svg>
+              <div><div class="big">4</div><div class="lbl">day streak</div></div>
+              <div class="long">Longest<b>12</b></div>
+            </div>
+            <div class="p-dots">
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="rest"><svg><use href="#i-leaf"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="today"></i>
+            </div>
+          </div>
+          <span class="p-btn" style="margin-top:0">Log a workout</span>
+          <div class="p-card" style="margin-top:10px;margin-bottom:0">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <b style="font-size:12px">Apps that wait</b><span style="color:var(--p-mint);font-size:11px;font-weight:700">Edit</span>
+            </div>
+            <div class="p-app"><span class="sq"></span>Instagram</div>
+            <div class="p-app"><span class="sq"></span>TikTok</div>
+            <div class="p-app"><span class="sq"></span>X</div>
+          </div>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Home, before today&#8217;s workout</span>
+        <h3>Home, locked</h3>
+        <p class="what">The screen the person sees most. A grey ring with a padlock, "Locked until you move", and "3 apps are waiting" under it. Then the streak card: the flame, the big number, the longest run on the right, and seven dots for the week. A mint check for a day done, an outlined leaf for a rest day, a flat grey dot for a day missed, and a mint outline for today while it is still open. Under it the one loud button, then the list of what is waiting.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Log a workout</span><span>Opens the log sheet.</span></li>
+          <li><span class="b">Edit</span><span>Opens Apple's picker to change the apps. New choices apply the moment the picker closes.</span></li>
+          <li><span class="b">Gear</span><span>Settings.</span></li>
+          <li><span class="b">Pull down</span><span>Refreshes: re-reads Apple Health, recomputes the streak, and re-applies the shields.</span></li>
+        </ul>
+        <p class="note">The app rows are drawn by iOS, from its own list. Nivli receives only an opaque token for each one and never learns the names in the mock above.</p>
+      </div>
+    </article>
+
+    <!-- 11 Home unlocked -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav">
+            <span></span>
+            <svg viewBox="256 218 556 532" style="width:22px;height:21px"><use href="#ni-mark"/></svg>
+            <svg class="gear"><use href="#i-gear"/></svg>
+          </div>
+          <div class="p-ring won"><svg><use href="#i-check"/></svg></div>
+          <p class="p-status">Unlocked for today</p>
+          <p class="p-detail">42 min run &#183; Apple Health</p>
+          <div class="p-card">
+            <div class="p-streak">
+              <svg class="flame"><use href="#i-flame"/></svg>
+              <div><div class="big">5</div><div class="lbl">day streak</div></div>
+              <div class="long">Longest<b>12</b></div>
+            </div>
+            <div class="p-dots">
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="rest"><svg><use href="#i-leaf"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+            </div>
+          </div>
+          <span class="p-btn quiet" style="margin-top:0">Add another</span>
+          <div class="p-card" style="margin-top:10px;margin-bottom:0">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <b style="font-size:12px">Apps that wait</b><span style="color:var(--p-mint);font-size:11px;font-weight:700">Edit</span>
+            </div>
+            <div class="p-app"><span class="sq"></span>Instagram</div>
+            <div class="p-app"><span class="sq"></span>TikTok</div>
+            <div class="p-app"><span class="sq"></span>X</div>
+          </div>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Home, after today&#8217;s workout</span>
+        <h3>Home, unlocked</h3>
+        <p class="what">The ring fills all the way round in mint with a check in the middle, and the words change to "Unlocked for today". Under them the workout that did it, attributed: "42 min run &#183; Apple Health", or "30 min strength &#183; logged by you" for a manual one. The streak number ticks up with a small digit animation and today's dot becomes a mint check.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Add another</span><span>The loud button is gone. A second workout can still be logged, quietly, and it changes nothing about today.</span></li>
+          <li><span class="b">Edit &#183; Gear</span><span>Same as on the locked screen.</span></li>
+        </ul>
+        <p class="note">Nothing here has to be tapped for the apps to open. If Health found the workout, the apps were already open before the app was opened.</p>
+      </div>
+    </article>
+
+    <!-- 12 Home rest day -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav">
+            <span></span>
+            <svg viewBox="256 218 556 532" style="width:22px;height:21px"><use href="#ni-mark"/></svg>
+            <svg class="gear"><use href="#i-gear"/></svg>
+          </div>
+          <div class="p-ring won"><svg><use href="#i-leaf"/></svg></div>
+          <p class="p-status">Rest day</p>
+          <p class="p-detail">Nothing is locked today</p>
+          <div class="p-card">
+            <div class="p-streak">
+              <svg class="flame"><use href="#i-flame"/></svg>
+              <div><div class="big">5</div><div class="lbl">day streak</div></div>
+              <div class="long">Longest<b>12</b></div>
+            </div>
+            <div class="p-dots">
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="rest"><svg><use href="#i-leaf"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="done"><svg><use href="#i-check"/></svg></i>
+              <i class="today"></i>
+            </div>
+          </div>
+          <span class="p-btn quiet" style="margin-top:0">Add another</span>
+          <div class="p-card" style="margin-top:10px;margin-bottom:0">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <b style="font-size:12px">Apps that wait</b><span style="color:var(--p-mint);font-size:11px;font-weight:700">Edit</span>
+            </div>
+            <div class="p-app"><span class="sq"></span>Instagram</div>
+            <div class="p-app"><span class="sq"></span>TikTok</div>
+            <div class="p-app"><span class="sq"></span>X</div>
+          </div>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Home, on a rest day</span>
+        <h3>Home, rest day</h3>
+        <p class="what">A filled ring again, but with a leaf instead of a check, so a rest day never reads as an achievement or as a failure. "Rest day", then "Nothing is locked today". The streak number sits still: a rest day neither grows it nor breaks it.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Add another</span><span>A workout on a rest day is still saved, and still counts as a day done.</span></li>
+        </ul>
+        <p class="note">A rest day comes either from the weekday toggles in Settings or from tapping "Take today off" once.</p>
+      </div>
+    </article>
+
+    <!-- 13 Log sheet -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span class="p-back" style="font-size:11px">Cancel</span></div>
+          <p class="p-h1" style="font-size:17px">Log a workout</p>
+          <p class="p-sub">Honor system. Nivli only works if you&#8217;re straight with yourself.</p>
+          <div class="p-grid">
+            <div class="p-tile on">Run</div><div class="p-tile">Walk</div><div class="p-tile">Strength</div>
+            <div class="p-tile">Cycle</div><div class="p-tile">Swim</div><div class="p-tile">Yoga</div>
+            <div class="p-tile">HIIT</div><div class="p-tile">Sport</div><div class="p-tile">Other</div>
+          </div>
+          <p class="p-h2" style="margin:12px 0 7px">How long</p>
+          <div class="p-chips">
+            <span class="p-mini">10</span><span class="p-mini">15</span><span class="p-mini on">20</span>
+            <span class="p-mini">30</span><span class="p-mini">45</span><span class="p-mini">60</span><span class="p-mini">90</span>
+          </div>
+          <div class="p-card" style="margin-top:9px;display:flex;justify-content:space-between;align-items:center">
+            <b style="font-size:13px">20 min</b><span style="color:var(--p-muted);font-size:12px">&#8722;&#8195;+</span>
+          </div>
+          <div style="color:var(--p-mint);font-size:11px;font-weight:700">&#10003; Counts toward today</div>
+          <div class="p-spacer"></div>
+          <span class="p-btn">Log it</span>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Sheet, from Home</span>
+        <h3>Log a workout</h3>
+        <p class="what">Two taps and a number. Nine kinds in a grid, seven common lengths as chips, and a stepper for anything else between 5 and 240 minutes. The duration starts on whatever counts today, so the common case really is one tap and Log it.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">A kind</span><span>Run, walk, strength, cycle, swim, yoga, HIIT, sport, other. The kind only changes the icon and the wording, never whether it counts.</span></li>
+          <li><span class="b">10 to 90, or the stepper</span><span>Sets the length. The line underneath updates as it changes.</span></li>
+          <li><span class="b">Log it</span><span>Saves it, closes the sheet, unlocks the apps if it qualifies, and hands Home the celebration.</span></li>
+          <li><span class="b">Cancel</span><span>Closes without saving.</span></li>
+        </ul>
+        <p class="note">Under the minimum, the mint line is replaced by the honest one: "Under your 20-minute minimum. It's saved, but your apps stay locked." It is said before saving, not after.</p>
+      </div>
+    </article>
+
+    <!-- 14 Celebration -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr" style="justify-content:center;align-items:center;text-align:center">
+          <div style="width:88px;height:88px;border-radius:50%;background:rgba(94,220,192,.16);display:grid;place-items:center;margin-bottom:14px">
+            <svg style="width:40px;height:40px;color:var(--p-mint)"><use href="#i-check"/></svg>
+          </div>
+          <div style="font-size:26px;font-weight:800;letter-spacing:-.03em">Unlocked.</div>
+          <div style="font-size:15px;font-weight:700;color:rgba(255,255,255,.85);margin-top:6px">5-day streak</div>
+          <div style="font-size:13px;font-weight:700;color:var(--p-mint);margin-top:8px">7 days!</div>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Two seconds, after a log</span>
+        <h3>Celebration</h3>
+        <p class="what">The screen goes dark, a mint check springs in, and the streak reads large: "Unlocked." then "5-day streak". There is a small haptic tap at the same moment. It only appears when the log actually opened the apps, so it never fires twice in a day.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">Tap anywhere</span><span>Dismisses it immediately.</span></li>
+          <li><span class="b">Nothing</span><span>It leaves on its own after about two seconds.</span></li>
+        </ul>
+        <p class="note">On a milestone (3, 7, 14, 30, 50, 100 and 365 days) a line like "7 days!" is added and confetti falls. Reduce Motion turns the confetti off and keeps the words.</p>
+      </div>
+    </article>
+
+    <!-- 15 Settings -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr">
+          <div class="p-nav"><span class="p-back">&#8249;</span><b style="font-size:12px">Settings</b><span style="width:10px"></span></div>
+          <div class="p-sec">Apps that wait</div>
+          <div class="p-list"><div class="p-item">4 apps &#183; 1 categories &#183; 2 sites<span class="v">&#8250;</span></div></div>
+          <div class="p-sec">Apple Health</div>
+          <div class="p-list"><div class="p-item">Connected<span class="v">&#10003;</span></div></div>
+          <div class="p-sec">What counts</div>
+          <div class="p-list"><div class="p-item">Minimum workout<span class="v">20 min</span></div></div>
+          <div class="p-sec">Rest days</div>
+          <div class="p-list">
+            <div class="p-item">Sunday<span class="v">On</span></div>
+            <div class="p-item">Monday<span class="v">Off</span></div>
+            <div class="p-item" style="color:#F7B267">Take today off</div>
+          </div>
+          <div class="p-sec">Reminders</div>
+          <div class="p-list"><div class="p-item">Evening reminder<span class="v">On</span></div><div class="p-item">Time<span class="v">6:00 PM</span></div></div>
+          <div class="p-sec">Appearance &#183; Subscription &#183; About</div>
+          <div class="p-list">
+            <div class="p-item">Appearance<span class="v">Dark</span></div>
+            <div class="p-item">Status<span class="v">Active</span></div>
+            <div class="p-item">Version<span class="v">3.0.0</span></div>
+            <div class="p-item red">Turn off Nivli and delete my data</div>
+          </div>
+          <div class="p-foot">Nivli keeps everything on this iPhone. There is no account and nothing is sent anywhere.</div>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">One list, nine sections</span>
+        <h3>Settings</h3>
+        <p class="what">Everything Nivli can be told, in one list, in this order.</p>
+        <h4>The sections</h4>
+        <ul class="btns">
+          <li><span class="b">Apps that wait</span><span>The current count, tappable straight into Apple's picker. An <b>Allow Screen Time</b> row appears if permission is still missing, with the way back if it was refused: "Tap Allow Screen Time to ask again, or allow Nivli under the iPhone's Settings, then Screen Time."</span></li>
+          <li><span class="b">Apple Health</span><span>Connect, or "Connected" with a tick. To turn it off: "To disconnect, open Health, then Sharing, then Apps, then Nivli." Only iOS can take the permission back.</span></li>
+          <li><span class="b">What counts</span><span>The minimum workout, 10 to 60 minutes. "A shorter workout is saved, but it does not unlock your apps."</span></li>
+          <li><span class="b">Rest days</span><span>Seven weekday switches, plus <b>Take today off</b>, which asks to confirm: "Nothing is locked until tomorrow. Your streak is kept."</span></li>
+          <li><span class="b">Reminders</span><span>The evening nudge on or off, and its time.</span></li>
+          <li><span class="b">Appearance</span><span>Dark, Light or Match iPhone. Dark is the default.</span></li>
+          <li><span class="b">Subscription</span><span>Status, <b>Manage subscription</b> (Apple's own sheet), <b>Restore Purchases</b>, and <b>Start again</b> if it has lapsed.</span></li>
+          <li><span class="b">About</span><span>Support, Privacy Policy, Terms of Use and the version number.</span></li>
+          <li><span class="b">Turn off Nivli and delete my data</span><span>In red, with a confirmation. It removes every lock, forgets the streak and returns to the first screen.</span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- 16 Shield -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="p-shield">
+          <svg class="mark" viewBox="256 218 556 532"><use href="#ni-mark"/></svg>
+          <p class="t">Move first.</p>
+          <p class="s">Log a workout in Nivli to unlock Instagram today.</p>
+          <p class="s">Streak: 5 days. Keep it.</p>
+          <span class="ok">OK</span>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">Drawn by iOS, over the blocked app</span>
+        <h3>The shield</h3>
+        <p class="what">This is the screen that does the work, and it is the only part of Nivli most people see on a normal day. iOS paints it over the blocked app, with the app blurred behind it. Dark ink, the Nivli mark, "Move first.", then the line that says what would open it, naming the app iOS hands over: "Log a workout in Nivli to unlock Instagram today." When there is a streak running, a second line is added: "Streak: 5 days. Keep it." One mint button.</p>
+        <h4>What the buttons do</h4>
+        <ul class="btns">
+          <li><span class="b">OK</span><span>Closes the shield and returns to the Home Screen. There is deliberately no second button, no "just five minutes" and no way through.</span></li>
+        </ul>
+        <p class="note">A blocked website says "this site" instead of an app name. The piece of Nivli that draws this reads only the streak number. It never touches the subscription, Apple Health, or the list of apps.</p>
+      </div>
+    </article>
+
+    <!-- 17 Notifications -->
+    <article class="screen">
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="scr tight" style="justify-content:center">
+          <div class="p-notif">
+            <span class="ic"><svg viewBox="256 218 556 532"><use href="#ni-mark"/></svg></span>
+            <div><p class="t">Apps unlocked</p><p class="b">Workout detected. Streak: 5 days.</p></div>
+          </div>
+          <div class="p-notif">
+            <span class="ic"><svg viewBox="256 218 556 532"><use href="#ni-mark"/></svg></span>
+            <div><p class="t">Still locked</p><p class="b">Your apps are waiting. Move, log it, and they open.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="copy">
+        <span class="kicker">The only two Nivli ever sends</span>
+        <h3>The two notifications</h3>
+        <p class="what">Both are made and delivered on the phone. There is no server anywhere that could send a third.</p>
+        <h4>What each one is</h4>
+        <ul class="btns">
+          <li><span class="b">Apps unlocked</span><span>"Workout detected. Streak: 5 days." Sent only when Apple Health finds a qualifying workout while Nivli is closed, so the person knows their apps opened without doing anything.</span></li>
+          <li><span class="b">Still locked</span><span>"Your apps are waiting. Move, log it, and they open." At the evening time they chose, and only on a day that is not done. Once today is unlocked or is a rest day, tonight's nudge is cancelled and the next one is tomorrow's.</span></li>
+        </ul>
+        <p class="note">Both are off unless the person turned reminders on, and there is nothing else. No streak warnings, no marketing, no re-engagement.</p>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section id="rules">
+  <h2>The rules</h2>
+  <p class="lede">Every screen and both background pieces obey the same short list.</p>
+  <div class="tbl">
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>Rule</th><th>How it works</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>What unlocks</td>
+            <td>Any one workout that is at or over the minimum. Manual or from Apple Health, it makes no difference. The kind makes no difference either.</td>
+          </tr>
+          <tr>
+            <td>Minimum minutes</td>
+            <td>20 by default. Can be 10, 15, 20, 30, 45 or 60, changed at any time in Settings. A shorter workout is kept in the history but does not unlock anything, and the log sheet says so before it is saved.</td>
+          </tr>
+          <tr>
+            <td>Midnight</td>
+            <td>The phone's own local day, midnight to midnight. At 00:00 the apps lock again, done by a background piece of Nivli, with the app closed. If iOS ever refuses to run it, the app re-applies the locks the next time it is opened.</td>
+          </tr>
+          <tr>
+            <td>Rest days</td>
+            <td>Weekdays chosen in Settings. Nothing is locked on them. The streak is neither grown nor broken. None are set on a new install.</td>
+          </tr>
+          <tr>
+            <td>Take today off</td>
+            <td>One tap, with a confirmation, applied to today only. Same effect as a weekly rest day. There is no limit on how often it can be used, on purpose: a lock the person cannot lift is a lock Apple would reject.</td>
+          </tr>
+          <tr>
+            <td>Streak</td>
+            <td>Consecutive days ending today in which every day is either a workout day or a rest day. Only workout days are counted. Today is never counted as a miss while it is still open. The longest run ever is kept separately and never goes down.</td>
+          </tr>
+          <tr>
+            <td>Subscription lapse</td>
+            <td>Nothing is locked, ever. Home shows a card: "Your subscription ended. Nothing is locked. Start again to keep your streak going." The history and the streak are untouched and come straight back on resubscribing.</td>
+          </tr>
+          <tr>
+            <td>Deleting the app</td>
+            <td>Every lock comes off immediately. That is iOS behaviour, not a Nivli setting, and it cannot be prevented. The workout history goes with the app.</td>
+          </tr>
+          <tr>
+            <td>What Nivli can see</td>
+            <td>Whether something is selected, how many things, the length and kind of each workout, the streak, and the settings. All of it on this phone only.</td>
+          </tr>
+          <tr>
+            <td>What Nivli cannot see</td>
+            <td>Which apps were picked. iOS hands over sealed tokens and draws the names itself. Nivli also cannot see anything inside those apps, cannot close an app that is already open, and cannot touch any other device or person.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="worked">
+    <h3>The streak, worked through ten days</h3>
+    <p>Minimum set to 20 minutes, with Sunday marked as a weekly rest day. Day 10 is today, and it is still early in the day.</p>
+    <div class="days">
+      <div class="day done"><b>1</b>30 min</div>
+      <div class="day done"><b>2</b>45 min</div>
+      <div class="day rest"><b>3</b>Sunday</div>
+      <div class="day done"><b>4</b>20 min</div>
+      <div class="day miss"><b>5</b>10 min</div>
+      <div class="day done"><b>6</b>25 min</div>
+      <div class="day done"><b>7</b>60 min</div>
+      <div class="day rest"><b>8</b>Day off</div>
+      <div class="day done"><b>9</b>30 min</div>
+      <div class="day"><b>10</b>Today</div>
+    </div>
+    <p><b>Day 3</b> is a Sunday, so nothing was expected and the streak carried across it. <b>Day 5</b> was a 10 minute walk, under the 20 minute minimum, so it is saved in the history but the day does not count and the streak breaks there. The streak restarts on day 6.</p>
+    <p><b>Day 8</b> used "Take today off", which bridges the same way a Sunday does. So today the counter reads <b>4</b>: days 6, 7 and 9 worked out, the day off in between bridged, and today is not counted yet because it is still open. Work out today and it reads <b>5</b>. Go to bed without moving and tomorrow it reads <b>0</b>.</p>
+  </div>
+</section>
+
+<section id="business">
+  <h2>Business</h2>
+  <p class="lede">One price, one product, no infrastructure.</p>
+  <div class="cols">
+    <div class="panel">
+      <span class="tag">The offer</span>
+      <h3>$2.99 a month, and nothing else</h3>
+      <ul>
+        <li>One subscription, monthly, $2.99 in the United States. Apple's storefront sets the price everywhere else.</li>
+        <li>A hard paywall at the end of onboarding. There is no free tier and no trial today.</li>
+        <li>A seven day free trial can be switched on later. It is an App Store Connect change only, no new build, and the paywall picks it up on its own.</li>
+        <li>Nothing else is for sale. No ads, no consumables, no upsell inside the app.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <span class="tag">What is reused</span>
+      <h3>The existing product and listing</h3>
+      <ul>
+        <li>Same App Store record, same bundle, released as version 3.0.0. The old product's listing copy is fully replaced.</li>
+        <li>The existing $2.99 monthly product is reused as is, so there is nothing to create and nothing to price.</li>
+        <li>The old yearly and lifetime products are removed from sale but not deleted. Anyone who bought one keeps full access in 3.0 through Restore Purchases.</li>
+      </ul>
+    </div>
+    <div class="panel good">
+      <span class="tag">Running cost</span>
+      <h3>No server, no account</h3>
+      <ul>
+        <li>Nothing runs anywhere but the customer's iPhone. There is no database, no hosting bill and no scaling risk.</li>
+        <li>No sign up and no password, so there is no support load from logins and no breach to have.</li>
+        <li>The only ongoing cost is the Apple Developer Program, which is already paid.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <span class="tag">Support</span>
+      <h3>Three flat web pages</h3>
+      <ul>
+        <li>A landing page, a privacy policy and a support page, hosted free on GitHub Pages at the addresses already built into the app.</li>
+        <li>They replace the old product's pages and have to go live before the app is submitted.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <h2>Privacy and Apple compliance</h2>
+  <p class="lede">The parts a reviewer will look at, and the answers that are already written down.</p>
+  <ul class="plain">
+    <li><b>Nothing is collected.</b> No account, no server, no analytics, no advertising, no tracking and no third party code at all. The App Store privacy label is "Data Not Collected", and the privacy manifests in all three parts of the app say the same.</li>
+    <li><b>The app list never leaves iOS.</b> Apple's picker hands back sealed tokens. Nivli stores them and asks iOS to draw them. Even the app's own code cannot read an app name out of one.</li>
+    <li><b>Apple Health is read only and optional.</b> Nivli reads workouts and nothing else, never writes anything back, and works fully without it. The permission text explains this, and the privacy policy names Health.</li>
+    <li><b>Screen Time is used on the person's own phone.</b> It is requested as individual authorization, for the person using the device, on that device. There are no parental, family or remote features, which is exactly what Apple's entitlement request asks about.</li>
+    <li><b>The subscription meets Apple's rules.</b> Price, period, Restore Purchases, the standard licence link, a privacy policy link and the renewal paragraph are all on the paywall, with the price read live from the App Store.</li>
+    <li><b>Nivli always fails open.</b> No subscription, unfinished onboarding, nothing chosen, a rest day or a workout logged all mean nothing is locked. Anything unusual leaves the phone alone, which is both the safe behaviour and the one Apple expects.</li>
+  </ul>
+</section>
+
+<section id="verified">
+  <h2>What was verified and what was not</h2>
+  <p class="lede">Being straight about this now is cheaper than being surprised later.</p>
+  <div class="cols">
+    <div class="panel good">
+      <span class="tag">Verified</span>
+      <h3>What passes today</h3>
+      <ul>
+        <li>The repository's own packaging checks pass. They read every file list, plist, icon, privacy manifest, entitlement and product ID and confirm they agree with each other and with the build pipeline.</li>
+        <li>Every Swift file was parsed for syntax on this Windows machine, so there are no unbalanced braces, stray characters or broken files.</li>
+        <li>Unit tests are written for the parts that carry the rules: the day boundary, the streak with rest days and gaps, the lock decision and the order it checks things in, the saved state round trip, the Health import and its duplicate handling, and the subscription to entitlement mapping.</li>
+        <li>Every screen, every button and every piece of copy has been read back against the design spec, which is what this document is written from.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <span class="tag">Not verified</span>
+      <h3>What is still open</h3>
+      <ul>
+        <li><b>It has not been compiled on a Mac.</b> The code was written against Apple's published interfaces from documentation, not against a compiler. Expect one or two rounds of small fixes on the first cloud build. This is normal and it is quick.</li>
+        <li><b>Nothing about Screen Time can be tested anywhere but a real iPhone.</b> The simulator has no Screen Time at all, so the shield, the picker and the midnight re-lock are only proved on your device.</li>
+        <li><b>The Apple Health background unlock needs real hardware</b>, an Apple Watch or the Fitness app, to prove that a workout opens the apps without Nivli being opened.</li>
+        <li><b>The price string</b> comes from the App Store at run time, so it is only confirmed once a build is on a device signed in to a real account.</li>
+        <li>The first compile is step 1 of your list below, and it is free.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="you">
+  <h2>What you need to do</h2>
+  <p class="lede">Nine steps, in order. None of them needs a Mac, and none of them needs any code. Each says what it costs you in time.</p>
+  <ol class="todo">
+    <li>
+      <div>
+        <div class="hd"><b>Compile it on Codemagic</b><span class="time">15 minutes, free</span></div>
+        <p>Sign in to Codemagic with GitHub, add the nivli repository, and start the "iOS Compile" workflow on main. Green means we are in good shape. Red means copying the first error line back to the engineering session for a fix. The free plan gives 500 build minutes a month and this uses about 8. Then run the unit test workflow the same way.</p>
+      </div>
+    </li>
+    <li class="long">
+      <div>
+        <div class="hd"><b>Ask Apple for the Family Controls entitlement</b><span class="time">10 minutes, then days to weeks</span><span class="flag">The long pole</span></div>
+        <p>This is the one thing on the list with a wait you do not control, so submit it today, before anything else. Screen Time blocking needs a permission Apple grants per app before it can be shipped, and without it the signed build fails at signing. The form is one page and the description to paste is already written in the handoff document, covering all three parts of the app. Everything else can proceed while you wait.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <div class="hd"><b>Switch on the capabilities in the Apple Developer portal</b><span class="time">10 minutes, after step 2</span></div>
+        <p>Once Apple approves, tick App Groups, HealthKit and Family Controls on the main app, untick iCloud and Push Notifications, and register the two small extension identifiers with the same settings. The exact clicks are written out in the build document.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <div class="hd"><b>App Store Connect: the subscription and the agreement</b><span class="time">15 minutes</span></div>
+        <p>Check that the Paid Apps agreement is still active. Rename the monthly product's display name to "Nivli Monthly" with the description "Unlock your apps by moving first", confirm $2.99 a month, and add a review screenshot. Remove the yearly and lifetime products from sale without deleting them, so existing customers keep their access.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <div class="hd"><b>Codemagic credentials</b><span class="time">5 minutes, only if needed</span></div>
+        <p>The credentials from the previous Nivli work unchanged. Only if Codemagic was set up from scratch do you need a fresh App Store Connect API key and the signing certificate file from your Desktop.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <div class="hd"><b>TestFlight build and device test</b><span class="time">30 minutes, after steps 1 to 5</span></div>
+        <p>Run the release workflow, install it on your iPhone through TestFlight, and walk the device test list. The three that matter most: a picked app shows the "Move first." shield, logging a 30 minute workout opens it, and the next morning it is locked again. Anything wrong goes back to the engineering session with the step number.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <div class="hd"><b>Publish the web pages</b><span class="time">5 minutes, the day you submit</span></div>
+        <p>The app links to a privacy page and a support page that currently serve the old product. Fill your legal name into the three new files, then upload them to the GitHub Pages repository. They go live within a minute.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <div class="hd"><b>App Store listing and submission</b><span class="time">45 minutes</span></div>
+        <p>Create version 3.0.0 and fill it in. Every field has a source file already written: name and description, what is new, screenshots, the privacy answers and the review notes. Delete every old screenshot first, because the reviewer compares them to the app and this is a different product. Then submit for review.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <div class="hd"><b>After approval</b><span class="time">Ongoing</span></div>
+        <p>Watch the crash reports for the first week. Optionally switch on a seven day free trial, which needs no new build. Optionally enable a second compile check on GitHub as a backup to Codemagic.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section id="decisions">
+  <h2>Decisions made for you</h2>
+  <p class="lede">You were not available while this was designed, so every open question was answered rather than left hanging. Any of these can be changed by saying so.</p>
+  <ul class="plain">
+    <li><b>Same app record, version 3.0.0.</b> Nivli 3.0 replaces the memory app in the same App Store listing rather than being a new app, so the existing subscription, agreement and customers carry over.</li>
+    <li><b>The existing $2.99 monthly product is reused.</b> Yearly and lifetime are retired from sale but honoured for anyone who already bought them.</li>
+    <li><b>A hard paywall after onboarding, with no free tier.</b> One price, one decision.</li>
+    <li><b>Manual logs are an honor system.</b> A workout counts at 20 minutes by default, adjustable from 10 to 60 in Settings. The sheet says this in as many words.</li>
+    <li><b>Weekly rest days and "take today off" both exist</b> and neither one breaks the streak.</li>
+    <li><b>The app fails open on purpose.</b> If the subscription lapses, onboarding is unfinished, or nothing is picked, nothing is ever locked. Apple would reject anything else.</li>
+    <li><b>iOS 18 and later, iPhone only, dark by default</b> with a light option and a match iPhone option.</li>
+    <li><b>No widgets, no Siri, no Watch app and no sharing in 3.0.</b> They were considered and left out to keep the first release small.</li>
+  </ul>
+</section>
+
+<section id="repo">
+  <h2>Repository map</h2>
+  <p class="lede">Where everything lives, in case anyone else ever has to pick this up.</p>
+  <div class="tbl">
+    <div class="tbl-scroll">
+      <table class="map">
+        <thead><tr><th>Folder</th><th>What is in it</th></tr></thead>
+        <tbody>
+          <tr><td>Nivli/</td><td>The app. Onboarding, paywall, Home, log sheet and Settings, plus the design system, the services that talk to Apple, and the shared rules.</td></tr>
+          <tr><td>NivliMonitor/</td><td>The small background piece that re-locks the apps at midnight.</td></tr>
+          <tr><td>NivliShield/</td><td>The piece that draws the "Move first." screen over a blocked app.</td></tr>
+          <tr><td>NivliTests/</td><td>Unit tests for the streak, the lock decision, saved state, Health import and entitlements.</td></tr>
+          <tr><td>Docs/</td><td>The owner handoff, the design spec, the build guide, the release checklist and the device test list.</td></tr>
+          <tr><td>AppStore/</td><td>Every word of the listing, the release notes, the screenshot plan, the privacy answers, the review notes and the subscription setup.</td></tr>
+          <tr><td>Web/</td><td>The landing, privacy and support pages to host.</td></tr>
+          <tr><td>Brand/</td><td>The icon, the mark and the brand guide.</td></tr>
+          <tr><td>Scripts/</td><td>The packaging checks and the icon generator.</td></tr>
+          <tr><td>codemagic.yaml</td><td>The cloud build pipeline: compile, test, sign, TestFlight and App Store upload, with no Mac involved.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer class="page">
+  <p>Nivli 3.0 product handoff &#183; 16 September 2026 &#183; written from the code as built. Every quoted line in this document is the exact text the app shows.</p>
+</footer>
+
+</main>
+</body>
+</html>

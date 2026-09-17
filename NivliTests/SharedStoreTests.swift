@@ -3,21 +3,21 @@ import XCTest
 @testable import Nivli
 
 final class SharedStoreTests: XCTestCase {
-    private var suiteName = ""
+    private var directory = URL(fileURLWithPath: NSTemporaryDirectory())
 
     override func setUp() {
         super.setUp()
-        suiteName = throwawaySuiteName()
+        directory = throwawayDirectory()
     }
 
     override func tearDown() {
-        UserDefaults.standard.removePersistentDomain(forName: suiteName)
+        try? FileManager.default.removeItem(at: directory)
         super.tearDown()
     }
 
     func testLoadReturnsDefaultsWhenNothingWasEverSaved() {
         // Arrange
-        let store = SharedStore(suiteName: suiteName)
+        let store = SharedStore(directory: directory)
 
         // Act
         let state = store.load()
@@ -30,7 +30,7 @@ final class SharedStoreTests: XCTestCase {
 
     func testSaveThenLoadRoundTripsTheState() {
         // Arrange
-        let store = SharedStore(suiteName: suiteName)
+        let store = SharedStore(directory: directory)
         let workout = makeWorkout(on: day(2026, 9, 16), minutes: 42, kind: .cycle, source: .health)
         let saved = makeState(
             minimumMinutes: 45,
@@ -68,7 +68,7 @@ final class SharedStoreTests: XCTestCase {
 
     func testEntitlementDateSurvivesTheRoundTripToTheSecond() {
         // Arrange — the encoder uses ISO-8601, which has no sub-second precision.
-        let store = SharedStore(suiteName: suiteName)
+        let store = SharedStore(directory: directory)
         let validUntil = Date(timeIntervalSince1970: 1_800_000_000)
 
         // Act
@@ -81,10 +81,10 @@ final class SharedStoreTests: XCTestCase {
 
     func testCorruptDataLoadsAsTheDefaultStateInsteadOfThrowing() throws {
         // Arrange
-        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
         let garbage = try XCTUnwrap("this is not JSON".data(using: .utf8))
-        defaults.set(garbage, forKey: SharedConstants.stateKey)
-        let store = SharedStore(suiteName: suiteName)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try garbage.write(to: directory.appendingPathComponent(SharedConstants.stateFileName))
+        let store = SharedStore(directory: directory)
 
         // Act
         let state = store.load()
@@ -95,7 +95,7 @@ final class SharedStoreTests: XCTestCase {
 
     func testUpdateReturnsAndPersistsTheChangedState() {
         // Arrange
-        let store = SharedStore(suiteName: suiteName)
+        let store = SharedStore(directory: directory)
 
         // Act
         let returned = store.update { state in
@@ -111,7 +111,7 @@ final class SharedStoreTests: XCTestCase {
 
     func testUpdateBuildsOnWhatIsAlreadyStored() {
         // Arrange
-        let store = SharedStore(suiteName: suiteName)
+        let store = SharedStore(directory: directory)
         store.update { $0.minimumMinutes = 30 }
 
         // Act
@@ -124,7 +124,7 @@ final class SharedStoreTests: XCTestCase {
 
     func testResetForgetsEverything() {
         // Arrange
-        let store = SharedStore(suiteName: suiteName)
+        let store = SharedStore(directory: directory)
         store.update { $0.onboardingComplete = true }
 
         // Act
@@ -134,10 +134,10 @@ final class SharedStoreTests: XCTestCase {
         XCTAssertEqual(store.load(), NivliState())
     }
 
-    func testTwoStoresOnTheSameSuiteSeeEachOthersWrites() {
+    func testTwoStoresOnTheSameFolderSeeEachOthersWrites() {
         // Arrange
-        let writer = SharedStore(suiteName: suiteName)
-        let reader = SharedStore(suiteName: suiteName)
+        let writer = SharedStore(directory: directory)
+        let reader = SharedStore(directory: directory)
 
         // Act
         writer.update { $0.minimumMinutes = 15 }

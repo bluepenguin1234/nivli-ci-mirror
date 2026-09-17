@@ -69,7 +69,8 @@ func noon(on day: DayKey) -> Date {
     day.date(in: testCalendar).addingTimeInterval(12 * 3600)
 }
 
-/// A unique `UserDefaults` suite name so two tests never see each other's data.
-func throwawaySuiteName(_ label: String = "store") -> String {
-    "com.bluepenguin.nivli.tests.\(label).\(UUID().uuidString)"
+/// A unique folder so two tests never see each other's state file.
+func throwawayDirectory(_ label: String = "store") -> URL {
+    FileManager.default.temporaryDirectory
+        .appendingPathComponent("nivli-tests-\(label)-\(UUID().uuidString)", isDirectory: true)
 }
