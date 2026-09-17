@@ -60,7 +60,8 @@ struct AppsThatWaitSection: View {
     private var unavailableMessage: String? {
         switch model.screenTime.status {
         case .unavailable(let message): return message
-        case .approved, .notDetermined, .denied: return nil
+        case .denied: return "Screen Time was declined, so nothing can be locked. Tap Allow Screen Time to ask again, or allow Nivli under the iPhone's Settings › Screen Time."
+        case .approved, .notDetermined: return nil
         }
     }
 

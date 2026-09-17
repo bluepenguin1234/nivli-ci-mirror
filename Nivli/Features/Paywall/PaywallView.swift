@@ -45,7 +45,16 @@ struct PaywallView: View {
         .safeAreaInset(edge: .top) { closeBar }
         .background(NivliCanvas().ignoresSafeArea())
         .task {
+            // Someone who already pays (a Nivli+ subscriber from 2.x, or a reinstall) never
+            // sees a price: the entitlement StoreKit found at launch walks them straight through.
+            if model.isSubscribed {
+                finish()
+                return
+            }
             if store.products.isEmpty { await store.loadProducts() }
+        }
+        .onChange(of: model.isSubscribed) { _, subscribed in
+            if subscribed { finish() }
         }
     }
 
