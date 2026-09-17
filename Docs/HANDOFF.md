@@ -7,10 +7,11 @@ should see when it worked. Nothing here needs a Mac or any code.
 
 **Where things stand.** The app is complete: 8-page onboarding, paywall, Home, log workout,
 Settings, the midnight re-lock extension and the branded shield, unit tests, store copy, web
-pages, and the cloud build pipeline. It passes the repository's own packaging checks and a
-Swift syntax parse of every file. **It has not yet been compiled on a Mac**, because this
-machine cannot run Xcode and the account's GitHub Actions billing is off. The first thing to
-do is step 1, which compiles it on Codemagic for free and tells us if anything needs a fix.
+pages, and the cloud build pipeline. It passes the repository's own packaging checks, and on
+17 September 2026 it was **compiled on a GitHub-hosted Mac (Xcode 26.6)**: the app and both
+extensions built with no errors, all 96 unit tests passed, and the launch smoke test passed
+on an iPhone simulator. What no cloud Mac can prove is the Screen Time behaviour itself,
+which only exists on a real iPhone; that is the TestFlight step below.
 
 ---
 
@@ -22,10 +23,10 @@ The free Codemagic plan includes 500 build minutes a month; a compile check uses
    `bluepenguin1234/nivli` → **Codemagic YAML** → finish. (If Codemagic cannot see the
    repository: GitHub → Settings → Applications → Codemagic → Configure → add `nivli`.)
 2. **Start new build** → branch `main` → workflow **iOS Compile — Fast check** → Start.
-3. Green: continue to step 2. Red: open the build, expand the red step, copy the first line
-   containing `error:` (and the file name next to it) into a new chat with the engineering
-   session, push the fix, re-run. Budget for one or two rounds; the code was written
-   against Apple's APIs from documentation, not compiled.
+3. Green: continue to step 2. (It was green on GitHub's Mac with the same Xcode version,
+   so expect green here too.) Red: open the build, expand the red step, copy the first
+   line containing `error:` (and the file name next to it) into a new chat with the
+   engineering session, push the fix, re-run.
 4. Then run **iOS Unit — Build + unit tests** the same way (about 15 minutes). Green means
    every rule about streaks, rest days, shields and entitlements passes on Apple's toolchain.
 
@@ -138,9 +139,8 @@ the app.
    ever locked (the app fails open on purpose; Apple would reject anything else).
 7. iOS 18 minimum, iPhone only, dark by default with a light option.
 
-## Things that cannot be verified from this PC
+## Things that cannot be verified without a real iPhone
 
-- Compilation on Xcode (step 1 does it).
 - Anything Screen Time: the simulator has no Screen Time, so only a real iPhone (step 6)
   proves the shield, the picker and the midnight re-lock.
 - Apple Health background unlock needs an Apple Watch or the Fitness app on the device.

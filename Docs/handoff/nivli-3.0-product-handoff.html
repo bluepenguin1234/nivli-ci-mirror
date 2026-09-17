@@ -507,7 +507,7 @@ footer.page{
   <h1>Nivli 3.0</h1>
   <p class="tagline">Move first. Then scroll.</p>
   <div class="meta">
-    <span class="pill">16 September 2026</span>
+    <span class="pill">17 September 2026</span>
     <span class="pill flat">Version 3.0.0</span>
     <span class="pill flat">iPhone, iOS 18 and later</span>
     <span class="pill flat">$2.99 a month</span>
@@ -515,7 +515,7 @@ footer.page{
   <div class="summary">
     <p>Nivli 3.0 is a new product in the same App Store listing. It locks the apps you choose until you have worked out today, then opens them until midnight.</p>
     <p>Everything is built: eight onboarding pages, the paywall, Home, the log sheet, Settings, the lock screen iOS draws over a blocked app, and the piece that re-locks everything at midnight.</p>
-    <p>The code is written, reviewed and pushed. It has not been compiled on a Mac yet, because this machine cannot run one. That first compile is step one of your list.</p>
+    <p>The code is written, reviewed, pushed, and compiled on a cloud Mac with Xcode 26.6: no build errors, 96 unit tests passing, and the app launching cleanly in an iPhone simulator. The Screen Time behaviour itself can only be proved on a real iPhone, which is the TestFlight step on your list.</p>
   </div>
 </header>
 
@@ -1343,9 +1343,11 @@ footer.page{
       <span class="tag">Verified</span>
       <h3>What passes today</h3>
       <ul>
-        <li>The repository's own packaging checks pass. They read every file list, plist, icon, privacy manifest, entitlement and product ID and confirm they agree with each other and with the build pipeline.</li>
-        <li>Every Swift file was parsed for syntax on this Windows machine, so there are no unbalanced braces, stray characters or broken files.</li>
-        <li>Unit tests are written for the parts that carry the rules: the day boundary, the streak with rest days and gaps, the lock decision and the order it checks things in, the saved state round trip, the Health import and its duplicate handling, and the subscription to entitlement mapping.</li>
+        <li><b>It compiles.</b> On 17 September 2026 a GitHub-hosted Mac with Xcode 26.6 built the app and both extensions with no errors, on the first attempt.</li>
+        <li><b>All 96 unit tests pass</b> on an iPhone simulator: the day boundary, the streak with rest days and gaps, the lock decision and the order it checks things in, the saved state round trip, the Health import and its duplicate handling, the subscription to entitlement mapping, and the onboarding gating.</li>
+        <li><b>The app launches</b> in the simulator and shows the first onboarding page (the automated launch test).</li>
+        <li>The repository's own packaging checks pass. They read every plist, icon, privacy manifest, entitlement and product ID and confirm they agree with each other and with the build pipeline.</li>
+        <li>Two independent reviews were done and their findings fixed: one for anything that would fail to compile, one for App Store rules, privacy and honesty of copy.</li>
         <li>Every screen, every button and every piece of copy has been read back against the design spec, which is what this document is written from.</li>
       </ul>
     </div>
@@ -1353,11 +1355,10 @@ footer.page{
       <span class="tag">Not verified</span>
       <h3>What is still open</h3>
       <ul>
-        <li><b>It has not been compiled on a Mac.</b> The code was written against Apple's published interfaces from documentation, not against a compiler. Expect one or two rounds of small fixes on the first cloud build. This is normal and it is quick.</li>
         <li><b>Nothing about Screen Time can be tested anywhere but a real iPhone.</b> The simulator has no Screen Time at all, so the shield, the picker and the midnight re-lock are only proved on your device.</li>
         <li><b>The Apple Health background unlock needs real hardware</b>, an Apple Watch or the Fitness app, to prove that a workout opens the apps without Nivli being opened.</li>
         <li><b>The price string</b> comes from the App Store at run time, so it is only confirmed once a build is on a device signed in to a real account.</li>
-        <li>The first compile is step 1 of your list below, and it is free.</li>
+        <li><b>The signed build</b> depends on Apple approving the Family Controls entitlement (step 2 of your list). Until then TestFlight cannot be built.</li>
       </ul>
     </div>
   </div>
@@ -1369,8 +1370,8 @@ footer.page{
   <ol class="todo">
     <li>
       <div>
-        <div class="hd"><b>Compile it on Codemagic</b><span class="time">15 minutes, free</span></div>
-        <p>Sign in to Codemagic with GitHub, add the nivli repository, and start the "iOS Compile" workflow on main. Green means we are in good shape. Red means copying the first error line back to the engineering session for a fix. The free plan gives 500 build minutes a month and this uses about 8. Then run the unit test workflow the same way.</p>
+        <div class="hd"><b>Connect Codemagic and compile once</b><span class="time">15 minutes, free</span></div>
+        <p>Sign in to Codemagic with GitHub, add the nivli repository, and start the "iOS Compile" workflow on main. It was already green on a GitHub Mac with the same Xcode, so this is a confirmation on the machine that will make the release build. The free plan gives 500 build minutes a month and this uses about 8.</p>
       </div>
     </li>
     <li class="long">
